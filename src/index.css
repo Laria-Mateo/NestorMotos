@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  @apply font-sans;
+}
+
+body, html {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+}

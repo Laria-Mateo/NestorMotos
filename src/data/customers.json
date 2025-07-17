@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Juan Pérez",
+    "image": "https://randomuser.me/api/portraits/men/32.jpg"
+  },
+  {
+    "id": "2",
+    "name": "María Gómez",
+    "image": "https://randomuser.me/api/portraits/women/44.jpg"
+  },
+  {
+    "id": "3",
+    "name": "Carlos Díaz",
+    "image": "https://randomuser.me/api/portraits/men/65.jpg"
+  },
+  {
+    "id": "4",
+    "name": "Lucía Fernández",
+    "image": "https://randomuser.me/api/portraits/women/68.jpg"
+  },
+  {
+    "id": "5",
+    "name": "Pedro Sosa",
+    "image": "https://randomuser.me/api/portraits/men/12.jpg"
+  },
+  {
+    "id": "6",
+    "name": "Sofía Ramírez",
+    "image": "https://randomuser.me/api/portraits/women/21.jpg"
+  }
+] 

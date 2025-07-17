@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "author": "Pedro Sosa",
+    "content": "Excelente atención y muy buenos precios. Recomendado!",
+    "rating": 5
+  },
+  {
+    "id": "2",
+    "author": "Ana Torres",
+    "content": "Me entregaron la moto en tiempo y forma, todo perfecto.",
+    "rating": 5
+  },
+  {
+    "id": "3",
+    "author": "Martín López",
+    "content": "Muy buena financiación y variedad de modelos.",
+    "rating": 4
+  },
+  {
+    "id": "4",
+    "author": "Sofía Ramírez",
+    "content": "La mejor casa de motos de la zona!",
+    "rating": 5
+  }
+] 

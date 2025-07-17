@@ -1,0 +1,74 @@
+[
+  {
+    "id": "1",
+    "name": "Honda Wave 110S",
+    "cc": 110,
+    "isQuad": false,
+    "image": "/src/assets/motorbikes/wave110s.webp",
+    "colors": ["Rojo", "Negro", "Blanco"]
+  },
+  {
+    "id": "2",
+    "name": "Yamaha Crypton 110",
+    "cc": 110,
+    "isQuad": false,
+    "image": "/src/assets/motorbikes/crypton110.png",
+    "colors": ["Negro", "Azul", "Blanco"]
+  },
+  {
+    "id": "13",
+    "name": "Motomel Blitz 125",
+    "cc": 110,
+    "isQuad": false,
+    "image": "/src/assets/motorbikes/blitz125.png",
+    "colors": ["Rojo", "Negro", "Gris"]
+  },
+  {
+    "id": "14",
+    "name": "Honda CG Titan 150",
+    "cc": 110,
+    "isQuad": false,
+    "image": "/src/assets/motorbikes/titan150.png",
+    "colors": ["Negro", "Rojo", "Azul"]
+  },
+  {
+    "id": "3",
+    "name": "Motomel Blitz 125",
+    "cc": 125,
+    "isQuad": false,
+    "image": "/src/assets/motorbikes/blitz125.png",
+    "colors": ["Rojo", "Negro", "Gris"]
+  },
+  {
+    "id": "4",
+    "name": "Honda CG Titan 150",
+    "cc": 150,
+    "isQuad": false,
+    "image": "/src/assets/motorbikes/titan150.png",
+    "colors": ["Negro", "Rojo", "Azul"]
+  },
+  {
+    "id": "5",
+    "name": "Yamaha FZ 250",
+    "cc": 250,
+    "isQuad": false,
+    "image": "/src/assets/motorbikes/fz250.png",
+    "colors": ["Negro", "Azul"]
+  },
+  {
+    "id": "6",
+    "name": "Gilera SMX 400",
+    "cc": 400,
+    "isQuad": false,
+    "image": "/src/assets/motorbikes/smx400.png",
+    "colors": ["Negro", "Gris"]
+  },
+  {
+    "id": "7",
+    "name": "CFMoto CForce 450",
+    "cc": 450,
+    "isQuad": true,
+    "image": "/src/assets/motorbikes/cforce450.png",
+    "colors": ["Naranja", "Negro"]
+  }
+] 
