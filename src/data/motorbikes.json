@@ -4,7 +4,7 @@
     "name": "Honda Wave 110S",
     "cc": 110,
     "isQuad": false,
-    "image": "/src/assets/motorbikes/wave110s.webp",
+    "image": "/motorbikes/wave110s.webp",
     "colors": ["Rojo", "Negro", "Blanco"]
   },
   {
@@ -12,7 +12,7 @@
     "name": "Yamaha Crypton 110",
     "cc": 110,
     "isQuad": false,
-    "image": "/src/assets/motorbikes/crypton110.png",
+    "image": "/motorbikes/crypton110.png",
     "colors": ["Negro", "Azul", "Blanco"]
   },
   {
@@ -20,7 +20,7 @@
     "name": "Motomel Blitz 125",
     "cc": 110,
     "isQuad": false,
-    "image": "/src/assets/motorbikes/blitz125.png",
+    "image": "/motorbikes/blitz125.png",
     "colors": ["Rojo", "Negro", "Gris"]
   },
   {
@@ -28,7 +28,7 @@
     "name": "Honda CG Titan 150",
     "cc": 110,
     "isQuad": false,
-    "image": "/src/assets/motorbikes/titan150.png",
+    "image": "/motorbikes/titan150.png",
     "colors": ["Negro", "Rojo", "Azul"]
   },
   {
@@ -36,7 +36,7 @@
     "name": "Motomel Blitz 125",
     "cc": 125,
     "isQuad": false,
-    "image": "/src/assets/motorbikes/blitz125.png",
+    "image": "/motorbikes/blitz125.png",
     "colors": ["Rojo", "Negro", "Gris"]
   },
   {
@@ -44,7 +44,7 @@
     "name": "Honda CG Titan 150",
     "cc": 150,
     "isQuad": false,
-    "image": "/src/assets/motorbikes/titan150.png",
+    "image": "/motorbikes/titan150.png",
     "colors": ["Negro", "Rojo", "Azul"]
   },
   {
@@ -52,7 +52,7 @@
     "name": "Yamaha FZ 250",
     "cc": 250,
     "isQuad": false,
-    "image": "/src/assets/motorbikes/fz250.png",
+    "image": "/motorbikes/fz250.png",
     "colors": ["Negro", "Azul"]
   },
   {
@@ -60,7 +60,7 @@
     "name": "Gilera SMX 400",
     "cc": 400,
     "isQuad": false,
-    "image": "/src/assets/motorbikes/smx400.png",
+    "image": "/motorbikes/smx400.png",
     "colors": ["Negro", "Gris"]
   },
   {
@@ -68,7 +68,7 @@
     "name": "CFMoto CForce 450",
     "cc": 450,
     "isQuad": true,
-    "image": "/src/assets/motorbikes/cforce450.png",
+    "image": "/motorbikes/cforce450.png",
     "colors": ["Naranja", "Negro"]
   }
 ] 

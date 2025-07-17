@@ -27,7 +27,7 @@ const Navbar: React.FC = () => {
       <div className="max-w-8xl mx-auto flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
           <img
-            src="/src/assets/logoSinFondo2.png"
+            src="/logoSinFondo2.png"
             alt="Logo Nestor Motos"
             className="h-16 md:h-20 w-auto object-contain bg-transparent"
             style={{ pointerEvents: 'none', background: 'transparent', border: 'none' }}

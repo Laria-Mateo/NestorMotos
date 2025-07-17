@@ -83,7 +83,7 @@ const Landing: React.FC = () => {
           id="home"
           className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-black"
           style={{
-            backgroundImage: 'url(/src/assets/background.png)',
+            backgroundImage: 'url(/background.png)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed',
@@ -96,7 +96,7 @@ const Landing: React.FC = () => {
             <div className="flex flex-col items-center gap-4">
               
               <img
-                src="/src/assets/logo.png"
+                src="/logo.png"
                 alt="Logo Nestor Motos"
                 className="w-40 md:w-56 object-contain shadow-lg mb-4"
                 draggable="false"
