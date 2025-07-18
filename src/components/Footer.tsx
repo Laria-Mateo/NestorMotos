@@ -6,7 +6,7 @@ const Footer: React.FC = () => {
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center md:items-start px-4 gap-8">
         <div className="flex flex-col items-center md:items-start mb-6 md:mb-0">
           <img
-            src="/logo.png"
+            src="/logo.webp"
             alt="Logo Nestor Motos"
             className="h-24 w-auto object-contain mb-2"
             style={{ background: 'transparent', border: 'none', pointerEvents: 'none' }}

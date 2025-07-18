@@ -59,7 +59,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
         />
         {/* Logo dentro de la imagen */}
         <img
-          src="/logo.png"
+          src="/logo.webp"
           alt="Logo Nestor Motos"
           className="absolute right-2 bottom-2 w-20 md:w-32 h-auto opacity-90 select-none pointer-events-none"
           draggable="false"

@@ -8,6 +8,7 @@ const cilindradasUnicas = Array.from(new Set(motorbikes.map(m => m.cc))).sort((a
 const ContactForm: React.FC = () => {
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
+  const [dni, setDni] = useState('');
   const [mayor21, setMayor21] = useState('');
   const [usadas, setUsadas] = useState(false);
   const [cilindrada, setCilindrada] = useState('');
@@ -22,11 +23,12 @@ const ContactForm: React.FC = () => {
   const modeloSeleccionado = motorbikes.find(m => m.name === modelo && String(m.cc) === cilindrada);
   const coloresDisponibles = modeloSeleccionado?.colors || [];
 
-  const isFormValid = nombre && apellido && mayor21 && (usadas || (cilindrada && modelo && (!coloresDisponibles.length || color)));
+  const isFormValid = nombre && apellido && dni && mayor21 && (usadas || (cilindrada && modelo && (!coloresDisponibles.length || color)));
 
   const missingFields = [];
   if (!nombre) missingFields.push('Nombre');
   if (!apellido) missingFields.push('Apellido');
+  if (!dni) missingFields.push('DNI');
   if (!mayor21) missingFields.push('¿Tenés más de 21 años?');
   if (!usadas) {
     if (!cilindrada) missingFields.push('Cilindrada');
@@ -38,6 +40,7 @@ const ContactForm: React.FC = () => {
     e.preventDefault();
     setShowErrors(false);
     let mensaje = `Hola! Mi nombre es ${nombre} ${apellido}.\n`;
+    mensaje += `DNI: ${dni}.\n`;
     mensaje += `Tengo ${mayor21 === 'si' ? 'más' : 'menos'} de 21 años.\n`;
     if (usadas) {
       mensaje += `Quiero consultar por motos usadas.\n`;
@@ -63,6 +66,7 @@ const ContactForm: React.FC = () => {
   const requiredFields = [
     { label: 'Nombre', valid: !!nombre },
     { label: 'Apellido', valid: !!apellido },
+    { label: 'DNI', valid: !!dni },
     { label: '¿Tenés más de 21 años?', valid: !!mayor21 },
     ...(!usadas ? [
       { label: 'Cilindrada', valid: !!cilindrada },
@@ -82,6 +86,24 @@ const ContactForm: React.FC = () => {
           <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="apellido">Apellido</label>
           <input id="apellido" type="text" className={`bg-white border ${showErrors && !apellido ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition shadow-sm w-full`} placeholder="Apellido" value={apellido} onChange={e => { setApellido(e.target.value); setTouched(true); }} onFocus={() => setTouched(true)} required />
         </div>
+      </div>
+      <div className="flex flex-col gap-1">
+        <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="dni">DNI</label>
+        <input 
+          id="dni" 
+          type="text" 
+          className={`bg-white border ${showErrors && !dni ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition shadow-sm w-full`} 
+          placeholder="DNI (sin puntos ni espacios)" 
+          value={dni} 
+          onChange={e => { 
+            const value = e.target.value.replace(/[^0-9]/g, ''); // Solo números
+            setDni(value); 
+            setTouched(true); 
+          }} 
+          onFocus={() => setTouched(true)} 
+          maxLength={8}
+          required 
+        />
       </div>
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-gray-700">¿Tenés más de 21 años?</label>

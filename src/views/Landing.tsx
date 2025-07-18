@@ -81,12 +81,11 @@ const Landing: React.FC = () => {
         
         <section
           id="home"
-          className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-black"
+          className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-black hero-background"
           style={{
-            backgroundImage: 'url(/background.png)',
+            backgroundImage: 'url(/background2.webp)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            backgroundAttachment: 'fixed',
           }}
         >
           
@@ -96,7 +95,7 @@ const Landing: React.FC = () => {
             <div className="flex flex-col items-center gap-4">
               
               <img
-                src="/logo.png"
+                src="/logo.webp"
                 alt="Logo Nestor Motos"
                 className="w-40 md:w-56 object-contain shadow-lg mb-4"
                 draggable="false"
@@ -140,7 +139,7 @@ const Landing: React.FC = () => {
                   <span className="bg-[#ff6600]/10 p-3 rounded-full">
                     <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><circle cx="12" cy="12" r="10" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" /></svg>
                   </span>
-                  <span className="text-lg font-semibold text-black">Horarios: <span className="text-[#ff6600] font-bold">L a V 8-13 y 16-20, Sáb 9-13</span></span>
+                  <span className="text-lg font-semibold text-black">Horarios: <span className="text-[#ff6600] font-bold">Lun a Vie 8-13hs y 16-20hs, Sáb 9-13hs</span></span>
                 </div>
                 <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
                   <span className="bg-[#ff6600]/10 p-3 rounded-full">
