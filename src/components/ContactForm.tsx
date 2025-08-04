@@ -23,7 +23,7 @@ const ContactForm: React.FC = () => {
   const modeloSeleccionado = motorbikes.find(m => m.name === modelo && String(m.cc) === cilindrada);
   const coloresDisponibles = modeloSeleccionado?.colors || [];
 
-  const isFormValid = nombre && apellido && dni && mayor21 && (usadas || (cilindrada && modelo && (!coloresDisponibles.length || color)));
+  const isFormValid = nombre && apellido && dni && mayor21 && (usadas || (cilindrada && modelo));
 
   const missingFields = [];
   if (!nombre) missingFields.push('Nombre');
@@ -33,7 +33,6 @@ const ContactForm: React.FC = () => {
   if (!usadas) {
     if (!cilindrada) missingFields.push('Cilindrada');
     if (!modelo) missingFields.push('Modelo');
-    if (coloresDisponibles.length > 0 && !color) missingFields.push('Color');
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -47,7 +46,7 @@ const ContactForm: React.FC = () => {
     } else {
       mensaje += `Cilindrada: ${cilindrada}cc.\n`;
       mensaje += `Modelo: ${modelo}.\n`;
-      if (color) mensaje += `Color: ${color}.\n`;
+  
     }
     if (observaciones) {
       mensaje += `Observaciones: ${observaciones}`;
@@ -70,8 +69,7 @@ const ContactForm: React.FC = () => {
     { label: '¿Tenés más de 21 años?', valid: !!mayor21 },
     ...(!usadas ? [
       { label: 'Cilindrada', valid: !!cilindrada },
-      { label: 'Modelo', valid: !!modelo },
-      ...(coloresDisponibles.length > 0 ? [{ label: 'Color', valid: !!color }] : [])
+      { label: 'Modelo', valid: !!modelo }
     ] : [])
   ];
 
@@ -117,14 +115,14 @@ const ContactForm: React.FC = () => {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <input type="checkbox" checked={usadas} onChange={e => { setUsadas(e.target.checked); setCilindrada(''); setModelo(''); setColor(''); setTouched(true); }} onFocus={() => setTouched(true)} className="accent-primary w-5 h-5" id="usadas" />
+        <input type="checkbox" checked={usadas} onChange={e => { setUsadas(e.target.checked); setCilindrada(''); setModelo(''); setTouched(true); }} onFocus={() => setTouched(true)} className="accent-primary w-5 h-5" id="usadas" />
         <label htmlFor="usadas" className="font-semibold text-gray-700 text-base select-none">Quiero consultar por motos usadas</label>
       </div>
-      {!usadas && (
+            {!usadas && (
         <div className="flex flex-col md:flex-row gap-5 w-full">
           <div className="flex-1 flex flex-col gap-1 min-w-0">
             <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="cilindrada">Cilindrada</label>
-            <select id="cilindrada" className={`bg-white border ${showErrors && !cilindrada ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition shadow-sm w-full min-w-0 max-w-full`} value={cilindrada} onChange={e => { setCilindrada(e.target.value); setModelo(''); setColor(''); setTouched(true); }} onFocus={() => setTouched(true)} required>
+            <select id="cilindrada" className={`bg-white border ${showErrors && !cilindrada ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition shadow-sm w-full min-w-0 max-w-full`} value={cilindrada} onChange={e => { setCilindrada(e.target.value); setModelo(''); setTouched(true); }} onFocus={() => setTouched(true)} required>
               <option value="">-- Elegir cilindrada --</option>
               {cilindradasUnicas.map((cc, idx) => (
                 <option key={idx} value={cc}>{cc}cc</option>
@@ -133,30 +131,35 @@ const ContactForm: React.FC = () => {
           </div>
           <div className="flex-1 flex flex-col gap-1 min-w-0">
             <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="modelo">Modelo</label>
-            <select id="modelo" className={`bg-white border ${showErrors && !modelo ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition shadow-sm w-full min-w-0 max-w-full`} value={modelo} onChange={e => { setModelo(e.target.value); setColor(''); setTouched(true); }} onFocus={() => setTouched(true)} required>
+            <select id="modelo" className={`bg-white border ${showErrors && !modelo ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition shadow-sm w-full min-w-0 max-w-full`} value={modelo} onChange={e => { setModelo(e.target.value); setTouched(true); }} onFocus={() => setTouched(true)} required>
               <option value="">-- Elegir modelo --</option>
               {modelosUnicos.map((m, idx) => (
                 <option key={idx} value={m}>{m}</option>
               ))}
             </select>
           </div>
-          {coloresDisponibles.length > 0 && (
-            <div className="flex-1 flex flex-col gap-1 min-w-0">
-              <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="color">Color</label>
-              <select id="color" className={`bg-white border ${showErrors && coloresDisponibles.length > 0 && !color ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition shadow-sm w-full min-w-0 max-w-full`} value={color} onChange={e => { setColor(e.target.value); setTouched(true); }} onFocus={() => setTouched(true)} required>
-                <option value="">-- Elegir color --</option>
-                {coloresDisponibles.map((c, idx) => (
-                  <option key={idx} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
       )}
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-gray-700" htmlFor="observaciones">Observaciones <span className="text-gray-400 font-normal">(opcional)</span></label>
         <textarea id="observaciones" className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition shadow-sm resize-none w-full" value={observaciones} onChange={e => { setObservaciones(e.target.value); setTouched(true); }} onFocus={() => setTouched(true)} rows={3} placeholder="Ej: Quiero saber por financiación, entrega, requisitos, etc." />
       </div>
+      
+      {/* Botón de Financiación */}
+      <button
+        type="button"
+        className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl py-3 text-lg shadow-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition w-full mt-2"
+        onClick={() => {
+          // Aquí se abriría el modal de financiación
+          alert('Funcionalidad de financiación en desarrollo');
+        }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+        ¿Quieres saber si puedes obtener financiaciones?
+      </button>
+      
       <button
         type="submit"
         className="flex items-center justify-center gap-2 bg-[#ff6600] hover:bg-[#ff944d] text-white font-bold rounded-xl py-3 text-lg shadow-md border border-[#ff6600]/70 focus:outline-none focus:ring-2 focus:ring-[#ff6600] transition w-full disabled:opacity-50 mt-2"

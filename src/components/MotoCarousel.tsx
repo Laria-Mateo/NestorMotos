@@ -31,6 +31,28 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
   // Ref para los ítems de la lista
   const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
 
+  // Para slider táctil en mobile
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = () => {
+    if (touchStartX.current !== null && touchEndX.current !== null) {
+      const diff = touchStartX.current - touchEndX.current;
+      if (Math.abs(diff) > 40) {
+        if (diff > 0) handleNext(); // swipe left
+        else handlePrev(); // swipe right
+      }
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
   // Para lista infinita en mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const repeatCount = isMobile && motos.length > 1 ? 3 : 1; // Repetir 3 veces para efecto infinito
@@ -50,13 +72,43 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
   const Modal = ({ moto, onClose }: { moto: Moto; onClose: () => void }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
       <div className="relative flex items-center justify-center">
-        <img
-          src={moto.image}
-          alt={moto.name}
-          className="max-h-[80vh] max-w-[90vw] object-contain mx-auto drop-shadow-2xl"
-          draggable="false"
-          style={{ background: 'none', border: 'none' }}
-        />
+        <div className="relative">
+          {/* Círculos de colores en el modal */}
+          {(moto as any).colors && (moto as any).colors.length > 0 && (
+            <div className="absolute top-4 left-4 bg-white/90 rounded-xl px-3 py-2 flex items-center gap-2 shadow-lg z-20">
+              <span className="text-sm font-semibold text-gray-700 mr-1">Colores:</span>
+              {(moto as any).colors.map((color: string, idx: number) => {
+                const colorMap: Record<string, string> = {
+                  'Rojo': '#ff0000',
+                  'Azul': '#0000ff',
+                  'Negro': '#000000',
+                  'Blanco': '#ffffff',
+                  'Verde': '#00ff00',
+                  'Amarillo': '#ffff00',
+                  'Gris': '#808080',
+                  'Naranja': '#ff6600'
+                };
+                const bg = colorMap[color] || '#ccc';
+                const border = color === 'Blanco' ? 'border border-gray-400' : '';
+                return (
+                  <div
+                    key={color + idx}
+                    className={`w-6 h-6 rounded-full ${border} shadow`}
+                    style={{ background: bg }}
+                    title={color}
+                  />
+                );
+              })}
+            </div>
+          )}
+          <img
+            src={moto.image}
+            alt={moto.name}
+            className="max-h-[80vh] max-w-[90vw] object-contain mx-auto drop-shadow-2xl"
+            draggable="false"
+            style={{ background: 'none', border: 'none' }}
+          />
+        </div>
         {/* Logo dentro de la imagen */}
         <img
           src="/logo.webp"
@@ -85,7 +137,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
           {length > 1 && (
             <button
               onClick={handlePrev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-transparent border-none text-primary rounded-full w-12 h-12 flex items-center justify-center hover:bg-[#ff6600]/10 transition duration-200"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-transparent border-none text-primary rounded-full w-12 h-12 md:flex hidden items-center justify-center hover:bg-[#ff6600]/10 transition duration-200"
               aria-label="Anterior"
             >
               <ArrowLeft />
@@ -101,20 +153,55 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
           )}
           {length > 0 && (
             <div className="w-full flex items-center justify-center">
-              <img
-                src={motos[current].image}
-                alt={motos[current].name}
-                className="w-full max-h-[420px] md:max-h-[500px] object-contain mx-auto transition-transform duration-300 hover:scale-105 drop-shadow-xl cursor-pointer"
-                draggable="false"
-                style={{ background: 'none', border: 'none' }}
-                onClick={() => { setShowModal(true); setModalMoto(motos[current]); }}
-              />
+              <div 
+                className="relative w-full flex items-center justify-center"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                {/* Círculos de colores */}
+                {(motos[current] as any).colors && (motos[current] as any).colors.length > 0 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 rounded-xl px-4 py-2 flex items-center gap-3 shadow-lg z-20">
+                    <span className="text-sm font-semibold text-gray-700 mr-2">Colores:</span>
+                    {(motos[current] as any).colors.map((color: string, idx: number) => {
+                      const colorMap: Record<string, string> = {
+                        'Rojo': '#ff0000',
+                        'Azul': '#0000ff',
+                        'Negro': '#000000',
+                        'Blanco': '#ffffff',
+                        'Verde': '#00ff00',
+                        'Amarillo': '#ffff00',
+                        'Gris': '#808080',
+                        'Naranja': '#ff6600'
+                      };
+                      const bg = colorMap[color] || '#ccc';
+                      const border = color === 'Blanco' ? 'border border-gray-400' : '';
+                      return (
+                        <div
+                          key={color + idx}
+                          className={`w-8 h-8 rounded-full ${border} shadow`}
+                          style={{ background: bg }}
+                          title={color}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+                <img
+                  src={motos[current].image}
+                  alt={motos[current].name}
+                  className="w-full max-h-[420px] md:max-h-[500px] object-contain mx-auto transition-transform duration-300 hover:scale-105 drop-shadow-xl cursor-pointer"
+                  draggable="false"
+                  style={{ background: 'none', border: 'none' }}
+                  onClick={() => { setShowModal(true); setModalMoto(motos[current]); }}
+                />
+              </div>
             </div>
           )}
           {length > 1 && (
             <button
               onClick={handleNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-transparent border-none text-primary rounded-full w-12 h-12 flex items-center justify-center hover:bg-[#ff6600]/10 transition duration-200"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-transparent border-none text-primary rounded-full w-12 h-12 md:flex hidden items-center justify-center hover:bg-[#ff6600]/10 transition duration-200"
               aria-label="Siguiente"
             >
               <ArrowRight />
