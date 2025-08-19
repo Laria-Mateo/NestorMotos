@@ -1,74 +1,82 @@
 [
   {
     "id": "1",
-    "name": "Honda Wave 110S",
-    "cc": 110,
+    "name": "Bajaj Rouser NS 200 0KM",  
+    "cc": 200,
     "isQuad": false,
-    "image": "/motorbikes/wave110s.webp",
-    "colors": ["Rojo", "Negro", "Blanco"]
+    "image": "/motorbikes/bajajRouser200.webp",
+    "colors": ["Negro", "Blanco", "Gris", "Rojo"]
   },
   {
     "id": "2",
-    "name": "Yamaha Crypton 110",
+    "name": "Zanella ZB 110 BASE | FULL 0KM",
     "cc": 110,
     "isQuad": false,
-    "image": "/motorbikes/crypton110.webp",
-    "colors": ["Negro", "Azul", "Blanco"]
-  },
-  {
-    "id": "13",
-    "name": "Motomel Blitz 125",
-    "cc": 110,
-    "isQuad": false,
-    "image": "/motorbikes/blitz125.webp",
-    "colors": ["Rojo", "Negro", "Gris"]
-  },
-  {
-    "id": "14",
-    "name": "Honda CG Titan 150",
-    "cc": 110,
-    "isQuad": false,
-    "image": "/motorbikes/titan150.webp",
-    "colors": ["Negro", "Rojo", "Azul"]
+    "image": "/motorbikes/zanellaZb110.webp",
+    "colors": ["Aluminio", "Gris", "Rojo"]
   },
   {
     "id": "3",
-    "name": "Motomel Blitz 125",
-    "cc": 125,
+    "name": "Corven Energy 110 BASE | FULL 0KM",
+    "cc": 110,
     "isQuad": false,
-    "image": "/motorbikes/blitz125.webp",
-    "colors": ["Rojo", "Negro", "Gris"]
+    "image": "/motorbikes/corvenEnergy110.webp",
+    "colors": ["Blanco", "Gris", "Rojo", "Azul", "Negro"]
   },
   {
     "id": "4",
-    "name": "Honda CG Titan 150",
-    "cc": 150,
+    "name": "Guerrero Trip 110 BASE | FULL 0KM",
+    "cc": 110,
     "isQuad": false,
-    "image": "/motorbikes/titan150.webp",
-    "colors": ["Negro", "Rojo", "Azul"]
+    "image": "/motorbikes/guerreroTrip110.webp",
+    "colors": ["Rojo", "Negro", "Azul"]
   },
   {
     "id": "5",
-    "name": "Yamaha FZ 250",
-    "cc": 250,
+    "name": "Honda XR 150 0KM",
+    "cc": 150,
     "isQuad": false,
-    "image": "/motorbikes/fz250.webp",
-    "colors": ["Negro", "Azul"]
+    "image": "/motorbikes/hondaXr150.webp",
+    "colors": ["Rojo", "Negro", "Blanco"]
   },
   {
     "id": "6",
-    "name": "Gilera SMX 400",
-    "cc": 400,
+    "name": "Honda XR300 Tornado 0KM",
+    "cc": 300,
     "isQuad": false,
-    "image": "/motorbikes/smx400.webp",
-    "colors": ["Negro", "Gris"]
+    "image": "/motorbikes/hondaXr300Tornado.webp",
+    "colors": ["Rojo", "Blanco", "Gris"]
   },
   {
     "id": "7",
-    "name": "CFMoto CForce 450",
-    "cc": 450,
-    "isQuad": true,
-    "image": "/motorbikes/cforce450.webp",
-    "colors": ["Naranja", "Negro"]
+    "name": "Honda Wave 110S 0KM",
+    "cc": 110,
+    "isQuad": false,
+    "image": "/motorbikes/hondaWave110s.webp",
+    "colors": ["Rojo", "Negro", "Blanco", "Gris"]
+  },
+  {
+    "id": "8",
+    "name": "Mondial MAX 110 BASE | FULL 0KM",
+    "cc": 110,
+    "isQuad": false,
+    "image": "/motorbikes/mondialMax110.webp",
+    "colors": ["Rojo", "Blanco", "Azul", "Negro"]
+  },
+  {
+    "id": "9",
+    "name": "Gilera Smash 110 FULL 0KM",
+    "cc": 110,
+    "isQuad": false,
+    "image": "/motorbikes/gileraSmash110.webp",
+    "colors": ["Rojo"]
+  },
+  {
+    "id": "10",
+    "name": "Corven Triax 150 0KM",
+    "cc": 150,
+    "isQuad": false,
+    "image": "/motorbikes/corvenTriax150.webp",
+    "colors": ["Blanco"]
   }
 ] 

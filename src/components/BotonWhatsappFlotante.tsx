@@ -20,10 +20,9 @@ const BotonWhatsappFlotante: React.FC = () => {
       aria-label="Ir al formulario de WhatsApp"
       style={{ boxShadow: '0 4px 24px 0 #0002' }}
     >
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="16" fill="#25D366" />
-        <path d="M23.5 17.5c-.3-.2-1.8-.9-2.1-1-..." fill="#fff" />
-        <path d="M16 6C10.5 6 6 10.5 6 16c0 2.1.6 4.1 1.7 5.8L6 26l4.3-1.1C11.9 25.6 13.9 26 16 26c5.5 0 10-4.5 10-10S21.5 6 16 6z" fill="#fff" fillOpacity=".2" />
+      <svg width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="12" fill="#25D366" />
+        <path fill="#fff" d="M16.7 15.3l-1.6 1.6c-2.9-1.1-5.4-3.6-6.5-6.5l1.6-1.6c.2-.2.3-.5.2-.8l-.5-2a1 1 0 00-1-.8H6a1 1 0 00-1 1c.1 3.9 1.7 7.6 4.4 10.3s6.4 4.3 10.3 4.4a1 1 0 001-1v-1.9a1 1 0 00-.8-1l-2-.5c-.3-.1-.6 0-.8.2z"/>
       </svg>
     </button>
   );

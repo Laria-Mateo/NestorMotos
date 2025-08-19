@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import motorbikes from '../data/motorbikes.json';
 
-const WHATSAPP_NUMBER = '5493433007984';
+// const WHATSAPP_PARANA = '5493433007984'; // Paraná (comentado temporalmente)
+const WHATSAPP_VENADO = '5493462669136'; // Venado Tuerto
 
 const cilindradasUnicas = Array.from(new Set(motorbikes.map(m => m.cc))).sort((a, b) => a - b);
 
@@ -13,15 +15,32 @@ const ContactForm: React.FC = () => {
   const [usadas, setUsadas] = useState(false);
   const [cilindrada, setCilindrada] = useState('');
   const [modelo, setModelo] = useState('');
-  const [color, setColor] = useState('');
   const [observaciones, setObservaciones] = useState('');
+  // const [sucursal, setSucursal] = useState('venado'); // 'parana' | 'venado' (comentado: sitio exclusivo Venado)
   const [showErrors, setShowErrors] = useState(false);
   const [touched, setTouched] = useState(false);
 
-  const modelosFiltrados = cilindrada ? motorbikes.filter(m => String(m.cc) === cilindrada) : [];
+  const modelosFiltrados = useMemo(() => (cilindrada ? motorbikes.filter(m => String(m.cc) === cilindrada) : []), [cilindrada]);
   const modelosUnicos = Array.from(new Set(modelosFiltrados.map(m => m.name)));
-  const modeloSeleccionado = motorbikes.find(m => m.name === modelo && String(m.cc) === cilindrada);
-  const coloresDisponibles = modeloSeleccionado?.colors || [];
+  // const modeloSeleccionado = motorbikes.find(m => m.name === modelo && String(m.cc) === cilindrada);
+
+  // Prellenar desde query param modelId
+  const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const modelId = params.get('modelId');
+    if (modelId) {
+      const found = motorbikes.find(m => m.id === modelId);
+      if (found) {
+        setUsadas(false);
+        setCilindrada(String(found.cc));
+        setModelo(found.name);
+        setObservaciones(prev => prev && !prev.includes('Consulta por modelo')
+          ? `${prev}\nConsulta por modelo: ${found.name}`
+          : prev || `Consulta por modelo: ${found.name}`);
+      }
+    }
+  }, [location.search]);
 
   const isFormValid = nombre && apellido && dni && mayor21 && (usadas || (cilindrada && modelo));
 
@@ -30,6 +49,7 @@ const ContactForm: React.FC = () => {
   if (!apellido) missingFields.push('Apellido');
   if (!dni) missingFields.push('DNI');
   if (!mayor21) missingFields.push('¿Tenés más de 21 años?');
+  // if (!sucursal) missingFields.push('Sucursal');
   if (!usadas) {
     if (!cilindrada) missingFields.push('Cilindrada');
     if (!modelo) missingFields.push('Modelo');
@@ -41,6 +61,8 @@ const ContactForm: React.FC = () => {
     let mensaje = `Hola! Mi nombre es ${nombre} ${apellido}.\n`;
     mensaje += `DNI: ${dni}.\n`;
     mensaje += `Tengo ${mayor21 === 'si' ? 'más' : 'menos'} de 21 años.\n`;
+    // Sitio exclusivo Venado Tuerto
+    mensaje += `Sucursal: Venado Tuerto.\n`;
     if (usadas) {
       mensaje += `Quiero consultar por motos usadas.\n`;
     } else {
@@ -52,7 +74,7 @@ const ContactForm: React.FC = () => {
       mensaje += `Observaciones: ${observaciones}`;
     }
     // Formato correcto para wa.me: https://wa.me/NUMERO?text=MENSAJE
-    const url = `https://wa.me/${WHATSAPP_NUMBER.replace('+','')}?text=${encodeURIComponent(mensaje)}`;
+    const url = `https://wa.me/${WHATSAPP_VENADO.replace('+','')}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   };
 
@@ -118,6 +140,19 @@ const ContactForm: React.FC = () => {
         <input type="checkbox" checked={usadas} onChange={e => { setUsadas(e.target.checked); setCilindrada(''); setModelo(''); setTouched(true); }} onFocus={() => setTouched(true)} className="accent-primary w-5 h-5" id="usadas" />
         <label htmlFor="usadas" className="font-semibold text-gray-700 text-base select-none">Quiero consultar por motos usadas</label>
       </div>
+      {/* Sucursal (comentado: sitio exclusivo Venado Tuerto)
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">Sucursal</label>
+        <div className="flex gap-8 mt-1">
+          <label className="flex items-center gap-2 text-gray-600 text-base">
+            <input type="radio" name="sucursal" value="venado" checked={sucursal==='venado'} onChange={e => { setSucursal(e.target.value); setTouched(true); }} onFocus={() => setTouched(true)} className="accent-primary" /> Venado Tuerto
+          </label>
+          <label className="flex items-center gap-2 text-gray-600 text-base">
+            <input type="radio" name="sucursal" value="parana" checked={sucursal==='parana'} onChange={e => { setSucursal(e.target.value); setTouched(true); }} onFocus={() => setTouched(true)} className="accent-primary" /> Paraná
+          </label>
+        </div>
+      </div>
+      */}
             {!usadas && (
         <div className="flex flex-col md:flex-row gap-5 w-full">
           <div className="flex-1 flex flex-col gap-1 min-w-0">
@@ -145,21 +180,6 @@ const ContactForm: React.FC = () => {
         <textarea id="observaciones" className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition shadow-sm resize-none w-full" value={observaciones} onChange={e => { setObservaciones(e.target.value); setTouched(true); }} onFocus={() => setTouched(true)} rows={3} placeholder="Ej: Quiero saber por financiación, entrega, requisitos, etc." />
       </div>
       
-      {/* Botón de Financiación */}
-      <button
-        type="button"
-        className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl py-3 text-lg shadow-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition w-full mt-2"
-        onClick={() => {
-          // Aquí se abriría el modal de financiación
-          alert('Funcionalidad de financiación en desarrollo');
-        }}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-        </svg>
-        ¿Quieres saber si puedes obtener financiaciones?
-      </button>
-      
       <button
         type="submit"
         className="flex items-center justify-center gap-2 bg-[#ff6600] hover:bg-[#ff944d] text-white font-bold rounded-xl py-3 text-lg shadow-md border border-[#ff6600]/70 focus:outline-none focus:ring-2 focus:ring-[#ff6600] transition w-full disabled:opacity-50 mt-2"
@@ -170,10 +190,10 @@ const ContactForm: React.FC = () => {
         Consultar por WhatsApp
       </button>
       {touched && (
-        <ul className="mt-4 flex flex-col gap-1 text-sm font-semibold text-left">
+        <ul className="mt-4 flex flex-col gap-2 text-sm font-semibold text-left">
           {requiredFields.map(f => (
-            <li key={f.label} className={f.valid ? 'text-green-600 flex items-center gap-1' : 'text-red-600 flex items-center gap-1'}>
-              <span className="inline-block w-3">{f.valid ? '✔️' : '⛔'}</span> {f.label}
+            <li key={f.label} className={f.valid ? 'text-green-600 flex items-center gap-2' : 'text-red-600 flex items-center gap-2'}>
+              <span className="inline-block w-4 mr-1">{f.valid ? '✔️' : '⛔'}</span> {f.label}
             </li>
           ))}
         </ul>

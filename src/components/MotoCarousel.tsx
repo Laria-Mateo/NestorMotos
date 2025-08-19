@@ -1,243 +1,482 @@
-import React, { useState, useEffect, useRef } from 'react';
+"use client"
+
+import type React from "react"
+import { useState, useEffect, useRef } from "react"
+// import { Link, useNavigate } from "react-router-dom"
 
 type Moto = {
-  id: string;
-  name: string;
-  cc: number;
-  isQuad: boolean;
-  image: string;
-};
+  id: string
+  name: string
+  cc: number
+  isQuad: boolean
+  image: string
+}
 
 type MotoCarouselProps = {
-  motos: Moto[];
-  title: string;
-};
+  motos: Moto[]
+  title: string
+}
 
 const ArrowLeft = () => (
-  <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15 19l-7-7 7-7" stroke="#FF6600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-);
-const ArrowRight = () => (
-  <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" stroke="#FF6600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-);
+  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+  </svg>
+)
 
-// Eliminar TrapezoidLabel y recuadros SVG
+const ArrowRight = () => (
+  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+  </svg>
+)
+
+//
+
+const ZapIcon = () => (
+  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+  </svg>
+)
+
+const CloseIcon = () => (
+  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+)
 
 const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
-  const [current, setCurrent] = useState(0);
-  const [showModal, setShowModal] = useState(false);
-  const [modalMoto, setModalMoto] = useState<Moto | null>(null);
-  const length = motos.length;
+  const [current, setCurrent] = useState(0)
+  const [showModal, setShowModal] = useState(false)
+  const [modalMoto, setModalMoto] = useState<Moto | null>(null)
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const [isTouching, setIsTouching] = useState(false)
+  const [hasFocus, setHasFocus] = useState(false)
+  const [isManualChange, setIsManualChange] = useState(false)
+  const length = motos.length
+  // const navigate = useNavigate()
 
   // Ref para los ítems de la lista
-  const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
+  const itemRefs = useRef<(HTMLLIElement | null)[]>([])
+  const carouselRef = useRef<HTMLDivElement>(null)
 
   // Para slider táctil en mobile
-  const touchStartX = useRef<number | null>(null);
-  const touchEndX = useRef<number | null>(null);
+  const touchStartX = useRef<number | null>(null)
+  const touchEndX = useRef<number | null>(null)
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
+    touchStartX.current = e.touches[0].clientX
+    touchEndX.current = null
+    setIsTouching(true)
+  }
+
   const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
-  };
+    touchEndX.current = e.touches[0].clientX
+  }
+
   const handleTouchEnd = () => {
     if (touchStartX.current !== null && touchEndX.current !== null) {
-      const diff = touchStartX.current - touchEndX.current;
-      if (Math.abs(diff) > 40) {
-        if (diff > 0) handleNext(); // swipe left
-        else handlePrev(); // swipe right
+      const diff = touchStartX.current - touchEndX.current
+      const minSwipeDistance = 50
+
+      if (Math.abs(diff) > minSwipeDistance) {
+        if (diff > 0) {
+          handleNext() // swipe left -> next
+        } else {
+          handlePrev() // swipe right -> prev
+        }
       }
     }
-    touchStartX.current = null;
-    touchEndX.current = null;
-  };
+    touchStartX.current = null
+    touchEndX.current = null
+    // Mantener isTouching por un momento después del touch para evitar auto-play inmediato
+    setTimeout(() => setIsTouching(false), 1000)
+  }
+
+  const handlePrev = () => {
+    if (isAnimating) return
+    setIsAnimating(true)
+    setIsManualChange(true) // Marcar como cambio manual
+    setCurrent((prev) => (prev - 1 + length) % length)
+    setTimeout(() => setIsAnimating(false), 300)
+  }
+
+  const handleNext = () => {
+    if (isAnimating) return
+    setIsAnimating(true)
+    setIsManualChange(true) // Marcar como cambio manual
+    setCurrent((prev) => (prev + 1) % length)
+    setTimeout(() => setIsAnimating(false), 300)
+  }
+
+  const handleAutoNext = () => {
+    if (isAnimating) return
+    setIsAnimating(true)
+    // NO marcar como manual para evitar scroll
+    setCurrent((prev) => (prev + 1) % length)
+    setTimeout(() => setIsAnimating(false), 300)
+  }
+
+  // Handlers para mouse events
+  const handleMouseEnter = () => {
+    setIsHovered(true)
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovered(false)
+  }
+
+  // Handlers para focus events
+  const handleFocus = () => {
+    setHasFocus(true)
+  }
+
+  const handleBlur = () => {
+    setHasFocus(false)
+  }
 
   // Para lista infinita en mobile
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const repeatCount = isMobile && motos.length > 1 ? 3 : 1; // Repetir 3 veces para efecto infinito
-  const infiniteMotos = isMobile && motos.length > 1 ? Array(repeatCount).fill(motos).flat() : motos;
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768
+  const repeatCount = isMobile && motos.length > 1 ? 3 : 1
+  const infiniteMotos = isMobile && motos.length > 1 ? Array(repeatCount).fill(motos).flat() : motos
 
   // Ajustar el scroll automático para centrar el ítem activo en mobile
   useEffect(() => {
-    if (isMobile && itemRefs.current[current + motos.length]) {
-      itemRefs.current[current + motos.length]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    if (isMobile && isManualChange && itemRefs.current[current + motos.length]) {
+      itemRefs.current[current + motos.length]?.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      })
     }
-  }, [current, isMobile, motos.length]);
+    // Reset el flag después del scroll
+    if (isManualChange) {
+      setIsManualChange(false)
+    }
+  }, [current, isMobile, motos.length, isManualChange])
 
-  const handlePrev = () => setCurrent((prev) => (prev - 1 + length) % length);
-  const handleNext = () => setCurrent((prev) => (prev + 1) % length);
+  // Auto-play mejorado con lógica de pausa
+  useEffect(() => {
+    // No hacer auto-play si:
+    // - Modal está abierto
+    // - Solo hay una moto
+    // - El usuario está hovering
+    // - El usuario está tocando (mobile)
+    // - Hay focus en el carrusel
+    // - Está animando
+    const shouldPause = showModal || length <= 1 || isHovered || isTouching || hasFocus || isAnimating
+
+    if (shouldPause) {
+      return
+    }
+
+    const interval = setInterval(() => {
+      handleAutoNext() // Usar la función específica para auto-play
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [showModal, length, isHovered, isTouching, hasFocus, isAnimating])
+
+  const colorMap: Record<string, string> = {
+    Rojo: "#ef4444",
+    Azul: "#3b82f6",
+    Negro: "#1f2937",
+    Blanco: "#f8fafc",
+    Verde: "#10b981",
+    Amarillo: "#f59e0b",
+    Gris: "#6b7280",
+    Naranja: "#ff6600",
+  }
 
   // Modal de detalles
   const Modal = ({ moto, onClose }: { moto: Moto; onClose: () => void }) => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-      <div className="relative flex items-center justify-center">
-        <div className="relative">
-          {/* Círculos de colores en el modal */}
-          {(moto as any).colors && (moto as any).colors.length > 0 && (
-            <div className="absolute top-4 left-4 bg-white/90 rounded-xl px-3 py-2 flex items-center gap-2 shadow-lg z-20">
-              <span className="text-sm font-semibold text-gray-700 mr-1">Colores:</span>
-              {(moto as any).colors.map((color: string, idx: number) => {
-                const colorMap: Record<string, string> = {
-                  'Rojo': '#ff0000',
-                  'Azul': '#0000ff',
-                  'Negro': '#000000',
-                  'Blanco': '#ffffff',
-                  'Verde': '#00ff00',
-                  'Amarillo': '#ffff00',
-                  'Gris': '#808080',
-                  'Naranja': '#ff6600'
-                };
-                const bg = colorMap[color] || '#ccc';
-                const border = color === 'Blanco' ? 'border border-gray-400' : '';
-                return (
-                  <div
-                    key={color + idx}
-                    className={`w-6 h-6 rounded-full ${border} shadow`}
-                    style={{ background: bg }}
-                    title={color}
-                  />
-                );
-              })}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm">
+      <div className="relative max-w-6xl max-h-[90vh] mx-4">
+        <div className="relative bg-white rounded-2xl overflow-hidden shadow-2xl">
+
+          {/* Header del modal */}
+          <div className="relative z-10 p-6 bg-white border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-1">{moto.name}</h3>
+                <div className="flex items-center gap-2 text-orange-500">
+                  <ZapIcon />
+                  <span className="text-sm font-medium">{moto.cc}cc</span>
+                  {moto.isQuad && <span className="text-xs bg-orange-500 text-white px-2 py-1 rounded-full">QUAD</span>}
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <a
+                  href={`/modelos/${moto.id}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.assign(`/modelos/${moto.id}`);
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.assign(`/modelos/${moto.id}`);
+                  }}
+                  className="inline-flex items-center gap-1 bg-[#ff6600] text-white font-semibold px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-sm hover:bg-[#ff944d] active:bg-[#cc5200] focus:outline-none focus:ring-2 focus:ring-[#ff6600]/40 text-sm md:text-base select-none"
+                >
+                  Más info
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </a>
+                <button
+                  onClick={onClose}
+                  className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-all duration-200"
+                >
+                  <CloseIcon />
+                </button>
+              </div>
             </div>
-          )}
-          <img
-            src={moto.image}
-            alt={moto.name}
-            className="max-h-[80vh] max-w-[90vw] object-contain mx-auto drop-shadow-2xl"
-            draggable="false"
-            style={{ background: 'none', border: 'none' }}
-          />
+
+            {/* Colores en el modal si existen */}
+            {(moto as any).colors && (moto as any).colors.length > 0 && (
+              <div className="mt-4 flex items-center gap-3">
+                <span className="text-sm text-gray-700">Colores disponibles:</span>
+                <div className="flex gap-2">
+                  {(moto as any).colors.map((color: string, idx: number) => (
+                    <div
+                      key={color + idx}
+                      className={`w-6 h-6 rounded-full border-2 border-white/20 shadow ${color === "Blanco" ? "border-gray-400" : ""}`}
+                      style={{ background: colorMap[color] || "#ccc" }}
+                      title={color}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Imagen del modal */}
+          <div className="relative p-8 bg-white">
+            <img
+              src={moto.image || "/placeholder.svg"}
+              alt={moto.name}
+              className="w-full max-h-[60vh] object-contain mx-auto drop-shadow-2xl"
+              draggable="false"
+            />
+            {/* Marca de agua removida */}
+          </div>
         </div>
-        {/* Logo dentro de la imagen */}
-        <img
-          src="/logo.webp"
-          alt="Logo Nestor Motos"
-          className="absolute right-2 bottom-2 w-20 md:w-32 h-auto opacity-90 select-none pointer-events-none"
-          draggable="false"
-        />
-        {/* Cruz dentro de la imagen */}
-        <button
-          className="absolute top-2 right-2 text-[#ff6600] hover:bg-[#ff6600]/10 rounded-full p-2 transition text-4xl font-extrabold z-50"
-          onClick={onClose}
-          aria-label="Cerrar"
-          style={{ lineHeight: 1 }}
-        >
-          &times;
-        </button>
       </div>
     </div>
-  );
+  )
+
+  if (length === 0) return null
 
   return (
-    <div className="mb-20 flex flex-col md:flex-row md:items-start gap-8">
-      <div className="flex-1">
-        <h3 className="text-3xl md:text-4xl font-extrabold uppercase tracking-widest text-black text-center mb-8 drop-shadow-sm border-b-4 border-[#ff6600]/60 inline-block pb-2 px-6">{title}</h3>
-        <section className="relative w-full max-w-3xl mx-auto bg-transparent rounded-3xl shadow-none p-0 flex flex-col items-center justify-center min-h-[480px]">
-          {length > 1 && (
-            <button
-              onClick={handlePrev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-transparent border-none text-primary rounded-full w-12 h-12 md:flex hidden items-center justify-center hover:bg-[#ff6600]/10 transition duration-200"
-              aria-label="Anterior"
-            >
-              <ArrowLeft />
-            </button>
-          )}
-          {length > 0 && (
-            <div className="w-full flex flex-col items-center mb-2">
-              <span className="relative text-2xl md:text-3xl font-extrabold uppercase tracking-widest text-black text-center mb-4 drop-shadow-lg" style={{ letterSpacing: '0.08em' }}>
-                <span className="relative z-10">{motos[current].name}</span>
-                <span className="absolute left-1/2 -translate-x-1/2 bottom-[-10px] w-16 h-1.5 rounded-full bg-gradient-to-r from-[#ff6600] via-[#ff944d] to-[#ff6600] animate-pulse z-0" aria-hidden="true" />
-              </span>
-            </div>
-          )}
-          {length > 0 && (
-            <div className="w-full flex items-center justify-center">
-              <div 
-                className="relative w-full flex items-center justify-center"
+    <div className="mb-20">
+      {/* Título principal mejorado */}
+      <div className="text-center mb-10">
+        <h2 className="text-3xl md:text-4xl font-extrabold tracking-wide text-gray-900">{title}</h2>
+        <div className="mt-3 w-20 h-1 bg-primary mx-auto rounded-full" />
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto px-4">
+        {/* Carrusel principal mejorado */}
+        <div className="flex-1">
+          <div
+            ref={carouselRef}
+            className="relative bg-white rounded-2xl shadow-xl ring-1 ring-gray-200/60 overflow-hidden"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            tabIndex={0}
+          >
+            
+
+            {/* Indicador de pausa del auto-play */}
+            {(isHovered || isTouching || hasFocus) && length > 1 && (
+              <div className="absolute bottom-3 right-3 z-30 bg-black/40 text-white/90 px-2.5 py-1 rounded-full text-[10px] font-medium backdrop-blur-sm">
+                Pausado
+              </div>
+            )}
+
+            {/* Controles de navegación mejorados - SOLO EN DESKTOP */}
+            {length > 1 && (
+              <>
+                <button
+                  onClick={handlePrev}
+                  disabled={isAnimating}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 text-gray-700 hover:text-orange-500 transition-all duration-200 hover:scale-110 disabled:opacity-50 hidden md:flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <ArrowLeft />
+                </button>
+                <button
+                  onClick={handleNext}
+                  disabled={isAnimating}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 text-gray-700 hover:text-orange-500 transition-all duration-200 hover:scale-110 disabled:opacity-50 hidden md:flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <ArrowRight />
+                </button>
+              </>
+            )}
+
+            {/* Contenido principal */}
+            <div className="relative p-8 md:p-12">
+              {/* Nombre de la moto mejorado */}
+              <div className="text-center mb-6">
+                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{motos[current].name}</h3>
+                <div className="flex items-center justify-center gap-4 text-primary">
+                  <div className="flex items-center gap-1">
+                    <ZapIcon />
+                    <span className="font-semibold">{motos[current].cc}cc</span>
+                  </div>
+                  {motos[current].isQuad && (
+                    <span className="bg-primary text-white px-3 py-1 rounded-full text-sm font-bold">
+                      QUAD
+                    </span>
+                  )}
+                  {(motos[current] as any).colors && (motos[current] as any).colors.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      {(motos[current] as any).colors.map((color: string, idx: number) => (
+                        <span
+                          key={color + idx}
+                          className={`inline-block w-3.5 h-3.5 rounded-full border ${color === "Blanco" ? "border-gray-300" : "border-white"}`}
+                          style={{ background: colorMap[color] || "#ccc" }}
+                          title={color}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Imagen principal mejorada */}
+              <div
+                className="relative group cursor-pointer"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
+                onClick={() => {
+                  // Solo abrir modal en desktop o si no hay movimiento táctil
+                  if (!isMobile || (touchStartX.current === null && touchEndX.current === null)) {
+                    setShowModal(true)
+                    setModalMoto(motos[current])
+                  }
+                }}
               >
-                {/* Círculos de colores */}
-                {(motos[current] as any).colors && (motos[current] as any).colors.length > 0 && (
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 rounded-xl px-4 py-2 flex items-center gap-3 shadow-lg z-20">
-                    <span className="text-sm font-semibold text-gray-700 mr-2">Colores:</span>
-                    {(motos[current] as any).colors.map((color: string, idx: number) => {
-                      const colorMap: Record<string, string> = {
-                        'Rojo': '#ff0000',
-                        'Azul': '#0000ff',
-                        'Negro': '#000000',
-                        'Blanco': '#ffffff',
-                        'Verde': '#00ff00',
-                        'Amarillo': '#ffff00',
-                        'Gris': '#808080',
-                        'Naranja': '#ff6600'
-                      };
-                      const bg = colorMap[color] || '#ccc';
-                      const border = color === 'Blanco' ? 'border border-gray-400' : '';
-                      return (
-                        <div
-                          key={color + idx}
-                          className={`w-8 h-8 rounded-full ${border} shadow`}
-                          style={{ background: bg }}
-                          title={color}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
-                <img
-                  src={motos[current].image}
-                  alt={motos[current].name}
-                  className="w-full max-h-[420px] md:max-h-[500px] object-contain mx-auto transition-transform duration-300 hover:scale-105 drop-shadow-xl cursor-pointer"
-                  draggable="false"
-                  style={{ background: 'none', border: 'none' }}
-                  onClick={() => { setShowModal(true); setModalMoto(motos[current]); }}
-                />
-              </div>
-            </div>
-          )}
-          {length > 1 && (
-            <button
-              onClick={handleNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-transparent border-none text-primary rounded-full w-12 h-12 md:flex hidden items-center justify-center hover:bg-[#ff6600]/10 transition duration-200"
-              aria-label="Siguiente"
-            >
-              <ArrowRight />
-            </button>
-          )}
-          {length > 1 && (
-            <div className="flex justify-center gap-3 mt-8">
-              {motos.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`transition-all duration-300 rounded-full ${idx === current ? 'w-8 h-3 bg-[#ff6600] scale-110 shadow-lg' : 'w-4 h-2 bg-[#ff6600]/30'}`}
-                  style={{ boxShadow: idx === current ? '0 2px 12px #FF660088' : undefined }}
-                />
-              ))}
-            </div>
-          )}
-          {showModal && modalMoto && <Modal moto={modalMoto} onClose={() => { setShowModal(false); setModalMoto(null); }} />}
-        </section>
-      </div>
-      {/* Lista de motos a la derecha (o abajo en mobile) */}
-      <div className="md:w-64 w-full md:sticky md:top-32 max-h-[520px] overflow-y-auto mt-8 md:mt-0 md:px-0 px-2">
-        <ul className="flex md:flex-col flex-row gap-2 md:gap-3 w-auto md:w-full min-w-0 justify-center md:justify-start overflow-x-auto scrollbar-hide scroll-px-2">
-          {(isMobile ? infiniteMotos : motos).map((moto, idx) => (
-            <li
-              key={moto.id + '-' + idx}
-              ref={el => { itemRefs.current[idx] = el; }}
-              className={`moto-list-item cursor-pointer px-4 py-2 rounded-lg font-bold text-base md:text-lg transition-all select-none whitespace-nowrap min-w-max w-auto ${((isMobile ? idx % motos.length : idx) === current) ? 'bg-[#ff6600]/90 text-white shadow-md active' : 'bg-gray-100 text-black hover:bg-[#ff6600]/20'}`}
-              onClick={() => setCurrent(isMobile ? idx % motos.length : idx)}
-            >
-              {moto.name}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-};
+                <div className="relative">
+                  <img
+                    src={motos[current].image || "/placeholder.svg"}
+                    alt={motos[current].name}
+                    className={`w-full h-[400px] md:h-[500px] object-contain transition-transform duration-500 ${
+                      isAnimating ? "scale-95" : "md:group-hover:scale-105"
+                    }`}
+                    draggable="false"
+                  />
 
-export default MotoCarousel; 
+
+                  {/* Indicador de deslizamiento en mobile */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 md:hidden">
+                    <div className="flex gap-1">
+                      <div className="w-8 h-1 bg-white/50 rounded-full"></div>
+                      <div className="w-8 h-1 bg-white/30 rounded-full"></div>
+                      <div className="w-8 h-1 bg-white/50 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Colores fuera de la imagen (moved arriba junto a cc) */}
+              </div>
+
+              {/* Indicadores mejorados */}
+              {length > 1 && (
+                <div className="flex justify-center gap-2 mt-6">
+                  {motos.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setIsManualChange(true)
+                        setCurrent(idx)
+                      }}
+                      onFocus={handleFocus}
+                      onBlur={handleBlur}
+                      className={`transition-all duration-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary ${
+                        idx === current ? "w-3 h-3 bg-primary shadow" : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
+                      }`}
+                    />
+                  ))}
+                  {/* Texto indicativo en mobile */}
+                  <div className="md:hidden absolute -bottom-6 left-1/2 -translate-x-1/2">
+                    <p className="text-xs text-gray-500 text-center">Desliza para ver más</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Lista lateral mejorada */}
+        <div className="lg:w-80">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden ring-1 ring-gray-200/60">
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 p-4">
+              <h4 className="text-white font-bold text-lg">Modelos Disponibles</h4>
+            </div>
+            <div className="max-h-[500px] overflow-y-auto">
+              <ul className="flex md:flex-col flex-row gap-2 md:gap-0 w-auto md:w-full min-w-0 justify-center md:justify-start overflow-x-auto scrollbar-hide scroll-px-2">
+                {(isMobile ? infiniteMotos : motos).map((moto, idx) => (
+                  <li
+                    key={moto.id + "-" + idx}
+                    ref={(el) => {
+                      itemRefs.current[idx] = el
+                    }}
+                    className={`moto-list-item cursor-pointer px-4 py-2 rounded-lg font-semibold text-base md:text-lg transition-colors select-none whitespace-nowrap min-w-max w-auto md:w-full md:p-4 md:text-left md:border-b md:border-gray-100 md:last:border-b-0 md:rounded-none ${
+                      (isMobile ? idx % motos.length : idx) === current
+                        ? "bg-gray-50 text-gray-900 md:bg-transparent md:border-l-4 md:border-l-primary md:text-primary"
+                        : "bg-gray-100 text-gray-800 hover:bg-gray-50 md:bg-transparent"
+                    }`}
+                    onClick={() => {
+                      setIsManualChange(true)
+                      setCurrent(isMobile ? idx % motos.length : idx)
+                    }}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                    tabIndex={0}
+                  >
+                    <div className="md:flex md:items-center md:justify-between">
+                      <div>
+                        <h5 className={`font-semibold md:block ${(isMobile ? idx % motos.length : idx) === current ? "md:text-primary" : "md:text-gray-800"}`}>
+                          {moto.name}
+                        </h5>
+                        <div className="hidden md:flex md:items-center md:gap-2 md:mt-1">
+                          <span className="text-sm text-gray-600">{moto.cc}cc</span>
+                          {moto.isQuad && (
+                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">QUAD</span>
+                          )}
+                        </div>
+                      </div>
+                      {(isMobile ? idx % motos.length : idx) === current && (
+                        <div className="hidden md:block w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal */}
+      {showModal && modalMoto && (
+        <Modal
+          moto={modalMoto}
+          onClose={() => {
+            setShowModal(false)
+            setModalMoto(null)
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+export default MotoCarousel

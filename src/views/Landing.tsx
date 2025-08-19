@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import GoogleReview from '../components/GoogleReview';
-import Carousel from '../components/Carousel';
 import MotoCarousel from '../components/MotoCarousel';
 import FinancingCard from '../components/FinancingCard';
 import ContactForm from '../components/ContactForm';
+import WhatsAppButton from '../components/WhatsAppButton';
 // ... otros imports de componentes (SectionTitle, etc.)
 import SectionTitle from '../components/SectionTitle';
 
 import reviewsData from '../data/googleReviews.json';
-import customersData from '../data/customers.json';
 import motorbikesData from '../data/motorbikes.json';
 
 // Definir el tipo de moto
@@ -59,6 +59,57 @@ const financingOptions = [
   }
 ];
 
+const MapSwitcher: React.FC = () => {
+  // Exclusivo Venado Tuerto (Paraná comentado)
+  // const paranaCoords = '-31.756278196473883,-60.53260317611488';
+  const venadoCoords = '-33.74189278721354,-61.958780955946374';
+  // const addressParana = 'Esquina Av. Espejo, Leopoldo Lugones y, E3100 Paraná, Entre Ríos';
+  const addressVenado = 'Av. Sta. Fe 740, S2600 Venado Tuerto, Santa Fe';
+  // const phoneParana = '+54 9 343 300-7984';
+  const phoneVenado = '+54 9 3462 669-136';
+  // const igParana = 'https://www.instagram.com/nestormotos2/';
+  const igVenado = 'https://www.instagram.com/nestormotosvenadotuerto/';
+
+  const src = `https://www.google.com/maps?q=${venadoCoords}&z=17&output=embed`;
+
+  return (
+    <div className="flex flex-col gap-3 items-center w-full">
+      {/* Selector de sucursal comentado (sitio exclusivo Venado Tuerto) */}
+      {/*
+      <div className="flex gap-6">
+        <label className="flex items-center gap-2 text-gray-700 font-semibold">
+          <input type="radio" name="suc" value="venado" checked className="accent-primary" readOnly /> Venado Tuerto
+        </label>
+        <label className="flex items-center gap-2 text-gray-700 font-semibold opacity-50 cursor-not-allowed">
+          <input type="radio" name="suc" value="parana" className="accent-primary" disabled /> Paraná
+        </label>
+      </div>
+      */}
+      <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden w-full h-72 flex items-center justify-center relative">
+        <iframe
+          title={`Mapa Venado Tuerto`}
+          src={src}
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+      <div className="text-sm text-black font-semibold text-center mt-1">
+        Dirección: <span className="text-[#ff6600] font-bold">{addressVenado}</span>
+      </div>
+      <div className="text-sm text-black font-semibold text-center">
+        Teléfono: <a className="text-[#ff6600] font-bold hover:underline" href={`tel:${phoneVenado.replace(/\s|-/g,'')}`}>{phoneVenado}</a>
+      </div>
+      <div className="text-sm text-black font-semibold text-center">
+        Instagram: <a href={igVenado} target="_blank" rel="noopener noreferrer" className="text-[#ff6600] font-bold hover:underline">@nestormotosvenadotuerto</a>
+      </div>
+    </div>
+  );
+};
+
 const Landing: React.FC = () => {
   const [randomReviews, setRandomReviews] = useState<typeof reviewsData>([]);
   const [motoCategories, setMotoCategories] = useState<MotoCategories>({
@@ -74,6 +125,17 @@ const Landing: React.FC = () => {
     setMotoCategories(groupMotosByCategory(motorbikesData as Moto[]));
   }, []);
 
+  // Scroll a cualquier sección si viene con hash
+  const location = useLocation();
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [location]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -88,25 +150,34 @@ const Landing: React.FC = () => {
             backgroundPosition: 'center',
           }}
         >
-          
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/80 z-20" />
-          
+          {/* Capa de color para mejorar legibilidad */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/80 z-20" />
+          {/* Radiales sutiles con marca */}
+          <div className="absolute inset-0 hero-overlay-radials z-10" />
+          {/* Grid sutil */}
+          <div className="absolute inset-0 hero-grid z-10" />
+          {/* Viñeta alrededor */}
+          <div className="absolute inset-0 hero-overlay-vignette z-20" />
+
           <div className="relative z-30 flex flex-col items-center justify-center w-full px-4 text-center">
             <div className="flex flex-col items-center gap-4">
               
               <img
-                src="/logo.webp"
+                src="/logoSinFondo2.webp"
                 alt="Logo Nestor Motos"
-                className="w-40 md:w-56 object-contain shadow-lg mb-4"
+                className="h-16 md:h-20 w-auto object-contain shadow-lg mb-4"
                 draggable="false"
                 style={{ pointerEvents: 'none', background: 'transparent', borderRadius: 0, border: 'none' }}
               />
-              <h1 className="text-4xl md:text-6xl font-extrabold text-white drop-shadow-lg mb-2">Tu próxima moto, hoy.</h1>
-              <span className="block text-xl md:text-2xl text-white font-bold drop-shadow-2xl bg-black/40 rounded-lg px-4 py-2 mx-auto max-w-fit">0km y usadas · Financiación <span style={{ color: '#FF6600' }} className="font-bold">sólo con DNI</span></span>
+              <h1 className="text-4xl md:text-6xl font-extrabold text-white drop-shadow-lg mb-2">
+                Tu próxima moto, hoy.
+              </h1>
+              <span className="block text-xl md:text-2xl text-white/95 font-semibold bg-black/40 rounded-xl px-4 py-2 mx-auto max-w-fit backdrop-blur-sm">
+                0km y usadas · Financiación <span className="text-primary font-extrabold">sólo con DNI</span>
+              </span>
               <a
                 href="#models"
-                className="mt-8 font-bold px-10 py-4 rounded-lg text-lg shadow-lg hover:bg-primary-light transition"
-                style={{ backgroundColor: '#FF6600', color: '#111' }}
+                className="mt-8 inline-block font-bold px-10 py-4 rounded-xl text-lg shadow-2xl bg-[#ff6600] text-white hover:bg-[#ff944d] active:bg-[#cc5200] focus:outline-none focus:ring-4 focus:ring-[#ff6600]/40 transition relative z-40 btn-underline-gradient"
                 onClick={e => {
                   e.preventDefault();
                   document.getElementById('models')?.scrollIntoView({ behavior: 'smooth' });
@@ -114,6 +185,7 @@ const Landing: React.FC = () => {
               >
                 Ver Modelos
               </a>
+              
             </div>
           </div>
         </section>
@@ -143,39 +215,19 @@ const Landing: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
                   <span className="bg-[#ff6600]/10 p-3 rounded-full">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h2.28a2 2 0 011.7 1l.94 1.88a2 2 0 001.7 1H19a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" /></svg>
-                  </span>
-                  <span className="text-lg font-semibold text-black">Teléfono: <a href="tel:03433007984" className="text-[#ff6600] font-bold hover:underline">0343 300-7984</a></span>
-                </div>
-                <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
-                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
                     <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-4-4h-1" /><circle cx="9" cy="7" r="4" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 11v9" /></svg>
                   </span>
                   <span className="text-lg font-semibold text-black">Casa Central: <span className="text-[#ff6600] font-bold">@nestormotos1 Venado Tuerto - SF</span></span>
                 </div>
               </div>
               <div className="flex flex-col gap-4 items-center">
-                <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden w-full h-72 flex items-center justify-center relative">
-                  <iframe
-                    title="Mapa Nestor Motos"
-                    src="https://www.google.com/maps?q=-31.756278196473883,-60.53260317611488&z=17&output=embed"
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  ></iframe>
-                </div>
-                <div className="text-base text-black font-semibold text-center mt-2">
-                  Dirección: <span className="text-[#ff6600] font-bold">Esquina Av. Espejo, Leopoldo Lugones y, E3100 Paraná, Entre Ríos</span>
-                </div>
+                <MapSwitcher />
               </div>
             </div>
           </div>
         </section>
         
-        <section id="models" className="py-20 bg-gray-100 border-b border-gray-200">
+        <section id="models" className="py-20 bg-gradient-to-b from-gray-50 via-white to-gray-100 border-b border-gray-200">
           <div className="max-w-5xl mx-auto px-4">
             <SectionTitle>Modelos de Motos</SectionTitle>
             <div className="flex flex-wrap justify-center gap-4 mb-10">
@@ -208,13 +260,22 @@ const Landing: React.FC = () => {
             {activeTab === 'cc125_150' && <MotoCarousel motos={motoCategories.cc125_150} title="125/150CC" />}
             {activeTab === 'cc250plus' && <MotoCarousel motos={motoCategories.cc250plus} title="250CC o más" />}
             {activeTab === 'quads' && <MotoCarousel motos={motoCategories.quads} title="Cuatriciclos" />}
+
+            <div className="mt-6 text-center">
+              <Link
+                to="/modelos"
+                className="px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10"
+              >
+                Ver todos
+              </Link>
+            </div>
           </div>
         </section>
         
-        <section id="financing" className="py-20 bg-white border-b border-gray-200">
+        <section id="financing" className="py-20 bg-black border-b border-gray-900">
           <div className="max-w-5xl mx-auto px-4">
-            <SectionTitle>Tipos de Financiaciones</SectionTitle>
-            <div className="flex flex-col md:flex-row gap-6 justify-center items-stretch">
+            <SectionTitle className="text-white">Tipos de Financiaciones</SectionTitle>
+            <div className="flex flex-col md:flex-row gap-6 justify-center items-stretch md:items-stretch">
               {financingOptions.map((option, idx) => (
                 <FinancingCard key={idx} title={option.title} description={option.description} />
               ))}
@@ -239,6 +300,7 @@ const Landing: React.FC = () => {
         </section>
       </main>
       <Footer />
+      <WhatsAppButton />
     </div>
   );
 };
