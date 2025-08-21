@@ -5,6 +5,10 @@ interface WhatsAppButtonProps {
 
 export function WhatsAppButton(_: WhatsAppButtonProps) {
   const handleClick = () => {
+    const isDesktop = typeof window !== 'undefined' ? window.innerWidth >= 1024 : false
+    if (isDesktop) {
+      try { sessionStorage.setItem('showFormHint', '1') } catch {}
+    }
     // Redirigir al formulario en lugar de WhatsApp
     const contact = document.getElementById('contact')
     if (contact) {

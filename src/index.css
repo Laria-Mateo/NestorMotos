@@ -44,6 +44,15 @@ body, html {
   opacity: 0.25;
 }
 
+/* Hide native scrollbars where applied */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 /* Button underline gradient like section titles */
 .btn-underline-gradient {
   position: relative;

@@ -66,7 +66,7 @@ const MapSwitcher: React.FC = () => {
   // const addressParana = 'Esquina Av. Espejo, Leopoldo Lugones y, E3100 Paraná, Entre Ríos';
   const addressVenado = 'Av. Sta. Fe 740, S2600 Venado Tuerto, Santa Fe';
   // const phoneParana = '+54 9 343 300-7984';
-  const phoneVenado = '+54 9 3462 669-136';
+  const phoneVenado = '+54 9 3462 252244';
   // const igParana = 'https://www.instagram.com/nestormotos2/';
   const igVenado = 'https://www.instagram.com/nestormotosvenadotuerto/';
 
@@ -145,7 +145,7 @@ const Landing: React.FC = () => {
           id="home"
           className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-black hero-background"
           style={{
-            backgroundImage: 'url(/background2.webp)',
+            backgroundImage: 'url(/backgroundVenado.webp)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -217,7 +217,7 @@ const Landing: React.FC = () => {
                   <span className="bg-[#ff6600]/10 p-3 rounded-full">
                     <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-4-4h-1" /><circle cx="9" cy="7" r="4" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 11v9" /></svg>
                   </span>
-                  <span className="text-lg font-semibold text-black">Casa Central: <span className="text-[#ff6600] font-bold">@nestormotos1 Venado Tuerto - SF</span></span>
+                  <span className="text-lg font-semibold text-black">Casa Central: <span className="text-[#ff6600] font-bold">@nestormotosvenadotuerto Venado Tuerto - SF</span></span>
                 </div>
               </div>
               <div className="flex flex-col gap-4 items-center">
@@ -283,19 +283,21 @@ const Landing: React.FC = () => {
           </div>
         </section>
         
-        <section id="reviews" className="py-20 bg-gray-100 border-b border-gray-200">
-          <div className="max-w-2xl mx-auto px-4">
-            <SectionTitle>Referencias de Google</SectionTitle>
-            {randomReviews.map((review) => (
-              <GoogleReview key={review.id} author={review.author} content={review.content} rating={review.rating} />
-            ))}
-          </div>
-        </section>
-        
         <section id="contact" className="py-20 bg-white">
           <div className="max-w-xl mx-auto px-4">
             <SectionTitle className="mb-8">Contacto</SectionTitle>
             <ContactForm />
+          </div>
+        </section>
+
+        <section id="reviews" className="py-20 bg-gray-100 border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-4">
+            <SectionTitle>Referencias de Google</SectionTitle>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {randomReviews.map((review) => (
+                <GoogleReview key={review.id} author={review.author} content={review.content} rating={review.rating} />
+              ))}
+            </div>
           </div>
         </section>
       </main>

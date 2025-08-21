@@ -19,6 +19,7 @@ const ContactForm: React.FC = () => {
   // const [sucursal, setSucursal] = useState('venado'); // 'parana' | 'venado' (comentado: sitio exclusivo Venado)
   const [showErrors, setShowErrors] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [showHint, setShowHint] = useState(false);
 
   const modelosFiltrados = useMemo(() => (cilindrada ? motorbikes.filter(m => String(m.cc) === cilindrada) : []), [cilindrada]);
   const modelosUnicos = Array.from(new Set(modelosFiltrados.map(m => m.name)));
@@ -41,6 +42,16 @@ const ContactForm: React.FC = () => {
       }
     }
   }, [location.search]);
+
+  // Mostrar ayuda si se llega desde el botón de WhatsApp (desktop)
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem('showFormHint') === '1') {
+        setShowHint(true);
+        sessionStorage.removeItem('showFormHint');
+      }
+    } catch {}
+  }, []);
 
   const isFormValid = nombre && apellido && dni && mayor21 && (usadas || (cilindrada && modelo));
 
@@ -96,7 +107,13 @@ const ContactForm: React.FC = () => {
   ];
 
   return (
-    <form className="bg-white rounded-2xl shadow-lg p-8 max-w-lg mx-auto flex flex-col gap-7 border border-gray-200" onSubmit={handleSubmit}>
+    <form className="bg-white rounded-2xl shadow-lg p-8 max-w-lg mx-auto flex flex-col gap-7 border border-gray-200 relative" onSubmit={handleSubmit}>
+      {showHint && (
+        <div className="hidden lg:flex absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded-full px-4 py-2 shadow z-10">
+          Completá tu consulta: elegí cilindrada y modelo, o marcá usadas.
+          <button type="button" className="ml-3 text-white/70 hover:text-white" onClick={() => setShowHint(false)}>Cerrar</button>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row gap-5 w-full">
         <div className="flex-1 flex flex-col gap-1">
           <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="nombre">Nombre</label>

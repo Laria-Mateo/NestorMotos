@@ -374,14 +374,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
                   />
 
 
-                  {/* Indicador de deslizamiento en mobile */}
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 md:hidden">
-                    <div className="flex gap-1">
-                      <div className="w-8 h-1 bg-white/50 rounded-full"></div>
-                      <div className="w-8 h-1 bg-white/30 rounded-full"></div>
-                      <div className="w-8 h-1 bg-white/50 rounded-full"></div>
-                    </div>
-                  </div>
+                  {/* Indicador de deslizamiento en mobile (removido a pedido) */}
                 </div>
 
                 {/* Colores fuera de la imagen (moved arriba junto a cc) */}
@@ -400,35 +393,33 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
                       onFocus={handleFocus}
                       onBlur={handleBlur}
                       className={`transition-all duration-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary ${
-                        idx === current ? "w-3 h-3 bg-primary shadow" : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
+                        idx === current ? "w-3 h-3 bg-[#ff6600] shadow" : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
                       }`}
                     />
                   ))}
                   {/* Texto indicativo en mobile */}
-                  <div className="md:hidden absolute -bottom-6 left-1/2 -translate-x-1/2">
-                    <p className="text-xs text-gray-500 text-center">Desliza para ver más</p>
-                  </div>
+                  {/* Mensaje mobile removido */}
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Lista lateral mejorada */}
-        <div className="lg:w-80">
+        {/* Lista lateral mejorada (oculta en mobile) */}
+        <div className="hidden md:block lg:w-80">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden ring-1 ring-gray-200/60">
             <div className="bg-gradient-to-r from-orange-500 to-red-500 p-4">
               <h4 className="text-white font-bold text-lg">Modelos Disponibles</h4>
             </div>
-            <div className="max-h-[500px] overflow-y-auto">
-              <ul className="flex md:flex-col flex-row gap-2 md:gap-0 w-auto md:w-full min-w-0 justify-center md:justify-start overflow-x-auto scrollbar-hide scroll-px-2">
+            <div className="max-h-[500px] overflow-y-auto scrollbar-hide">
+              <ul className="flex flex-col gap-0 w-full justify-start overflow-x-visible">
                 {(isMobile ? infiniteMotos : motos).map((moto, idx) => (
                   <li
                     key={moto.id + "-" + idx}
                     ref={(el) => {
                       itemRefs.current[idx] = el
                     }}
-                    className={`moto-list-item cursor-pointer px-4 py-2 rounded-lg font-semibold text-base md:text-lg transition-colors select-none whitespace-nowrap min-w-max w-auto md:w-full md:p-4 md:text-left md:border-b md:border-gray-100 md:last:border-b-0 md:rounded-none ${
+                    className={`moto-list-item cursor-pointer px-4 py-2 rounded-lg font-semibold text-base md:text-lg transition-colors select-none whitespace-normal w-full md:w-full md:p-4 md:text-left md:border-b md:border-gray-100 md:last:border-b-0 md:rounded-none ${
                       (isMobile ? idx % motos.length : idx) === current
                         ? "bg-gray-50 text-gray-900 md:bg-transparent md:border-l-4 md:border-l-primary md:text-primary"
                         : "bg-gray-100 text-gray-800 hover:bg-gray-50 md:bg-transparent"
