@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import GoogleReview from '../components/GoogleReview';
@@ -11,7 +11,8 @@ import WhatsAppButton from '../components/WhatsAppButton';
 import SectionTitle from '../components/SectionTitle';
 
 import reviewsData from '../data/googleReviews.json';
-import motorbikesData from '../data/motorbikes.json';
+import motorbikesVenado from '../data/motorbikesVenado.json';
+import motorbikesParana from '../data/motorbikesParana.json';
 
 // Definir el tipo de moto
 interface Moto {
@@ -59,59 +60,11 @@ const financingOptions = [
   }
 ];
 
-const MapSwitcher: React.FC = () => {
-  // Exclusivo Venado Tuerto (Paraná comentado)
-  // const paranaCoords = '-31.756278196473883,-60.53260317611488';
-  const venadoCoords = '-33.74189278721354,-61.958780955946374';
-  // const addressParana = 'Esquina Av. Espejo, Leopoldo Lugones y, E3100 Paraná, Entre Ríos';
-  const addressVenado = 'Av. Sta. Fe 740, S2600 Venado Tuerto, Santa Fe';
-  // const phoneParana = '+54 9 343 300-7984';
-  const phoneVenado = '+54 9 3462 669-136';
-  // const igParana = 'https://www.instagram.com/nestormotos2/';
-  const igVenado = 'https://www.instagram.com/nestormotosvenadotuerto/';
 
-  const src = `https://www.google.com/maps?q=${venadoCoords}&z=17&output=embed`;
-
-  return (
-    <div className="flex flex-col gap-3 items-center w-full">
-      {/* Selector de sucursal comentado (sitio exclusivo Venado Tuerto) */}
-      {/*
-      <div className="flex gap-6">
-        <label className="flex items-center gap-2 text-gray-700 font-semibold">
-          <input type="radio" name="suc" value="venado" checked className="accent-primary" readOnly /> Venado Tuerto
-        </label>
-        <label className="flex items-center gap-2 text-gray-700 font-semibold opacity-50 cursor-not-allowed">
-          <input type="radio" name="suc" value="parana" className="accent-primary" disabled /> Paraná
-        </label>
-      </div>
-      */}
-      <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden w-full h-72 flex items-center justify-center relative">
-        <iframe
-          title={`Mapa Venado Tuerto`}
-          src={src}
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        ></iframe>
-      </div>
-      <div className="text-sm text-black font-semibold text-center mt-1">
-        Dirección: <span className="text-[#ff6600] font-bold">{addressVenado}</span>
-      </div>
-      <div className="text-sm text-black font-semibold text-center">
-        Teléfono: <a className="text-[#ff6600] font-bold hover:underline" href={`tel:${phoneVenado.replace(/\s|-/g,'')}`}>{phoneVenado}</a>
-      </div>
-      <div className="text-sm text-black font-semibold text-center">
-        Instagram: <a href={igVenado} target="_blank" rel="noopener noreferrer" className="text-[#ff6600] font-bold hover:underline">@nestormotosvenadotuerto</a>
-      </div>
-    </div>
-  );
-};
 
 const Landing: React.FC = () => {
   const [randomReviews, setRandomReviews] = useState<typeof reviewsData>([]);
+  const branch = (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado') || 'venado';
   const [motoCategories, setMotoCategories] = useState<MotoCategories>({
     cc110: [],
     cc125_150: [],
@@ -122,11 +75,27 @@ const Landing: React.FC = () => {
 
   useEffect(() => {
     setRandomReviews(getRandomReviews(reviewsData, 3));
-    setMotoCategories(groupMotosByCategory(motorbikesData as Moto[]));
-  }, []);
+    const data = (branch === 'parana' ? (motorbikesParana as Moto[]) : (motorbikesVenado as Moto[]));
+    setMotoCategories(groupMotosByCategory(data));
+  }, [branch]);
+
+  // Si el usuario cambió de sucursal desde el navbar, no forzar /sucursal
+  const branchChanged = (typeof window !== 'undefined' ? sessionStorage.getItem('branchChanged') : null);
 
   // Scroll a cualquier sección si viene con hash
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Enforce branch selection
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('branch');
+      if (!saved && !branchChanged) {
+        navigate('/sucursal', { replace: true });
+      }
+      try { if (branchChanged) sessionStorage.removeItem('branchChanged') } catch {}
+    }
+  }, [navigate, branchChanged]);
   useEffect(() => {
     if (location.hash) {
       const id = location.hash.replace('#', '');
@@ -135,6 +104,25 @@ const Landing: React.FC = () => {
       }, 100);
     }
   }, [location]);
+
+  // Categorías disponibles según sucursal (oculta las vacías)
+  const availableCategories = (
+    [
+      { key: 'cc110' as const, label: '110CC' },
+      { key: 'cc125_150' as const, label: '125/150CC' },
+      { key: 'cc250plus' as const, label: '250CC o más' },
+      { key: 'quads' as const, label: 'Cuatriciclos' },
+    ]
+  ).filter(c => (motoCategories[c.key] || []).length > 0);
+
+  // Asegurar activeTab válido
+  useEffect(() => {
+    if (!motoCategories[activeTab] || motoCategories[activeTab].length === 0) {
+      if (availableCategories.length > 0) {
+        setActiveTab(availableCategories[0].key);
+      }
+    }
+  }, [motoCategories, activeTab]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -145,7 +133,7 @@ const Landing: React.FC = () => {
           id="home"
           className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-black hero-background"
           style={{
-            backgroundImage: 'url(/background2.webp)',
+            backgroundImage: `url(${branch === 'parana' ? '/background2.webp' : '/backgroundVenado.webp'})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -217,11 +205,26 @@ const Landing: React.FC = () => {
                   <span className="bg-[#ff6600]/10 p-3 rounded-full">
                     <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-4-4h-1" /><circle cx="9" cy="7" r="4" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 11v9" /></svg>
                   </span>
-                  <span className="text-lg font-semibold text-black">Casa Central: <span className="text-[#ff6600] font-bold">@nestormotos1 Venado Tuerto - SF</span></span>
+                  <span className="text-lg font-semibold text-black">Casa Central: <span className="text-[#ff6600] font-bold">@nestormotosvenadotuerto Venado Tuerto - SF</span></span>
                 </div>
               </div>
               <div className="flex flex-col gap-4 items-center">
-                <MapSwitcher />
+                {/* MapSwitcher removido; se define por sucursal elegida */}
+                <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden w-full h-72 flex items-center justify-center relative">
+                  <iframe
+                    title={`Mapa ${branch === 'parana' ? 'Paraná' : 'Venado Tuerto'}`}
+                    src={`https://www.google.com/maps?q=${branch === 'parana' ? '-31.756278196473883,-60.53260317611488' : '-33.74189278721354,-61.958780955946374'}&z=17&output=embed`}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
+                </div>
+                <div className="text-base text-black font-semibold text-center mt-2">
+                  Dirección: <span className="text-[#ff6600] font-bold">{branch === 'parana' ? 'Esquina Av. Espejo, Leopoldo Lugones y, E3100 Paraná, Entre Ríos' : 'Av. Sta. Fe 740, S2600 Venado Tuerto, Santa Fe'}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -231,35 +234,20 @@ const Landing: React.FC = () => {
           <div className="max-w-5xl mx-auto px-4">
             <SectionTitle>Modelos de Motos</SectionTitle>
             <div className="flex flex-wrap justify-center gap-4 mb-10">
-              <button
-                className={`px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm ${activeTab === 'cc110' ? 'bg-[#ff6600] text-white border-[#ff6600] scale-105' : 'bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10'}`}
-                onClick={() => setActiveTab('cc110')}
-              >
-                110CC
-              </button>
-              <button
-                className={`px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm ${activeTab === 'cc125_150' ? 'bg-[#ff6600] text-white border-[#ff6600] scale-105' : 'bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10'}`}
-                onClick={() => setActiveTab('cc125_150')}
-              >
-                125/150CC
-              </button>
-              <button
-                className={`px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm ${activeTab === 'cc250plus' ? 'bg-[#ff6600] text-white border-[#ff6600] scale-105' : 'bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10'}`}
-                onClick={() => setActiveTab('cc250plus')}
-              >
-                250CC o más
-              </button>
-              <button
-                className={`px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm ${activeTab === 'quads' ? 'bg-[#ff6600] text-white border-[#ff6600] scale-105' : 'bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10'}`}
-                onClick={() => setActiveTab('quads')}
-              >
-                Cuatriciclos
-              </button>
+              {availableCategories.map(c => (
+                <button
+                  key={c.key}
+                  className={`px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm ${activeTab === c.key ? 'bg-[#ff6600] text-white border-[#ff6600] scale-105' : 'bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10'}`}
+                  onClick={() => setActiveTab(c.key)}
+                >
+                  {c.label}
+                </button>
+              ))}
             </div>
-            {activeTab === 'cc110' && <MotoCarousel motos={motoCategories.cc110} title="110CC" />}
-            {activeTab === 'cc125_150' && <MotoCarousel motos={motoCategories.cc125_150} title="125/150CC" />}
-            {activeTab === 'cc250plus' && <MotoCarousel motos={motoCategories.cc250plus} title="250CC o más" />}
-            {activeTab === 'quads' && <MotoCarousel motos={motoCategories.quads} title="Cuatriciclos" />}
+            {activeTab === 'cc110' && <MotoCarousel motos={motoCategories.cc110} />}
+            {activeTab === 'cc125_150' && <MotoCarousel motos={motoCategories.cc125_150} />}
+            {activeTab === 'cc250plus' && <MotoCarousel motos={motoCategories.cc250plus} />}
+            {activeTab === 'quads' && <MotoCarousel motos={motoCategories.quads} />}
 
             <div className="mt-6 text-center">
               <Link
@@ -283,19 +271,21 @@ const Landing: React.FC = () => {
           </div>
         </section>
         
-        <section id="reviews" className="py-20 bg-gray-100 border-b border-gray-200">
-          <div className="max-w-2xl mx-auto px-4">
-            <SectionTitle>Referencias de Google</SectionTitle>
-            {randomReviews.map((review) => (
-              <GoogleReview key={review.id} author={review.author} content={review.content} rating={review.rating} />
-            ))}
-          </div>
-        </section>
-        
         <section id="contact" className="py-20 bg-white">
           <div className="max-w-xl mx-auto px-4">
             <SectionTitle className="mb-8">Contacto</SectionTitle>
             <ContactForm />
+          </div>
+        </section>
+
+        <section id="reviews" className="py-20 bg-gray-100 border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-4">
+            <SectionTitle>Referencias de Google</SectionTitle>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {randomReviews.map((review) => (
+                <GoogleReview key={review.id} author={review.author} content={review.content} rating={review.rating} />
+              ))}
+            </div>
           </div>
         </section>
       </main>

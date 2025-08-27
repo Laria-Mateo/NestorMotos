@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import motorbikes from '../data/motorbikes.json';
+import motorbikesVenado from '../data/motorbikesVenado.json';
+import motorbikesParana from '../data/motorbikesParana.json';
 
 // const WHATSAPP_PARANA = '5493433007984'; // Paraná (comentado temporalmente)
 const WHATSAPP_VENADO = '5493462669136'; // Venado Tuerto
 
-const cilindradasUnicas = Array.from(new Set(motorbikes.map(m => m.cc))).sort((a, b) => a - b);
+// Sitio actual: Venado Tuerto por defecto, pero aceptamos prellenado desde cualquier ID
+const allMotorbikes = [...motorbikesVenado, ...motorbikesParana];
 
 const ContactForm: React.FC = () => {
   const [nombre, setNombre] = useState('');
@@ -20,7 +22,13 @@ const ContactForm: React.FC = () => {
   const [showErrors, setShowErrors] = useState(false);
   const [touched, setTouched] = useState(false);
 
-  const modelosFiltrados = useMemo(() => (cilindrada ? motorbikes.filter(m => String(m.cc) === cilindrada) : []), [cilindrada]);
+  // Determinar sucursal actual para separar el catálogo en el formulario
+  const branch = (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado') || 'venado';
+  const dataset = branch === 'parana' ? motorbikesParana : motorbikesVenado;
+
+  // Opciones de cilindrada y modelos filtradas por sucursal
+  const cilindradasUnicas = useMemo(() => Array.from(new Set(dataset.map(m => m.cc))).sort((a, b) => a - b), [dataset]);
+  const modelosFiltrados = useMemo(() => (cilindrada ? dataset.filter(m => String(m.cc) === cilindrada) : []), [cilindrada, dataset]);
   const modelosUnicos = Array.from(new Set(modelosFiltrados.map(m => m.name)));
   // const modeloSeleccionado = motorbikes.find(m => m.name === modelo && String(m.cc) === cilindrada);
 
@@ -30,7 +38,7 @@ const ContactForm: React.FC = () => {
     const params = new URLSearchParams(location.search);
     const modelId = params.get('modelId');
     if (modelId) {
-      const found = motorbikes.find(m => m.id === modelId);
+      const found = allMotorbikes.find(m => m.id === modelId);
       if (found) {
         setUsadas(false);
         setCilindrada(String(found.cc));

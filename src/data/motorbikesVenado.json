@@ -1,0 +1,15 @@
+[
+  { "id": "v1", "name": "Bajaj Rouser NS 200 0KM", "cc": 200, "isQuad": false, "image": "/motorbikes/bajajRouser200.webp", "colors": ["Negro", "Blanco", "Gris", "Rojo"] },
+  { "id": "v2", "name": "Zanella ZB 110 BASE | FULL 0KM", "cc": 110, "isQuad": false, "image": "/motorbikes/zanellaZb110.webp", "colors": ["Aluminio", "Gris", "Rojo"] },
+  { "id": "v3", "name": "Corven Energy 110 BASE | FULL 0KM", "cc": 110, "isQuad": false, "image": "/motorbikes/corvenEnergy110.webp", "colors": ["Blanco", "Gris", "Rojo", "Azul", "Negro"] },
+  { "id": "v4", "name": "Guerrero Trip 110 BASE | FULL 0KM", "cc": 110, "isQuad": false, "image": "/motorbikes/guerreroTrip110.webp", "colors": ["Rojo", "Negro", "Azul"] },
+  { "id": "v5", "name": "Honda XR 150 0KM", "cc": 150, "isQuad": false, "image": "/motorbikes/hondaXr150.webp", "colors": ["Rojo", "Negro", "Blanco"] },
+  { "id": "v6", "name": "Honda XR300 Tornado 0KM", "cc": 300, "isQuad": false, "image": "/motorbikes/hondaXr300Tornado.webp", "colors": ["Rojo", "Blanco", "Gris"] },
+  { "id": "v7", "name": "Honda Wave 110S 0KM", "cc": 110, "isQuad": false, "image": "/motorbikes/hondaWave110s.webp", "colors": ["Rojo", "Negro", "Blanco", "Gris"] },
+  { "id": "v8", "name": "Mondial MAX 110 BASE | FULL 0KM", "cc": 110, "isQuad": false, "image": "/motorbikes/mondialMax110.webp", "colors": ["Rojo", "Blanco", "Azul", "Negro"] },
+  { "id": "v9", "name": "Gilera Smash 110 FULL 0KM", "cc": 110, "isQuad": false, "image": "/motorbikes/gileraSmash110.webp", "colors": ["Rojo"] },
+  { "id": "v10", "name": "Corven Triax 150 0KM", "cc": 150, "isQuad": false, "image": "/motorbikes/corvenTriax150.webp", "colors": ["Blanco"] }
+]
+
+
+

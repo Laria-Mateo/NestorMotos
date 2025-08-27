@@ -65,7 +65,7 @@ const Navbar: React.FC = () => {
           </button>
         </div>
         {/* Desktop menu */}
-        <ul className="hidden md:flex gap-6 font-medium font-sans">
+        <ul className="hidden md:flex gap-6 font-medium font-sans items-center">
           <li><a href="#home" className="px-2 py-1 rounded transition hover:text-[#ff6600] hover:underline underline-offset-8 decoration-2 decoration-[#ff6600]" onClick={goOrScroll('#home')}>Inicio</a></li>
           <li><a href="#about" className="px-2 py-1 rounded transition hover:text-[#ff6600] hover:underline underline-offset-8 decoration-2 decoration-[#ff6600]" onClick={goOrScroll('#about')}>Sobre Nosotros</a></li>
           <li className="relative group">
@@ -77,6 +77,9 @@ const Navbar: React.FC = () => {
           <li><a href="#financing" className="px-2 py-1 rounded transition hover:text-[#ff6600] hover:underline underline-offset-8 decoration-2 decoration-[#ff6600]" onClick={goOrScroll('#financing')}>Financiación</a></li>
           <li><a href="#reviews" className="px-2 py-1 rounded transition hover:text-[#ff6600] hover:underline underline-offset-8 decoration-2 decoration-[#ff6600]" onClick={goOrScroll('#reviews')}>Referencias</a></li>
           <li><a href="#contact" className="px-2 py-1 rounded transition hover:text-[#ff6600] hover:underline underline-offset-8 decoration-2 decoration-[#ff6600]" onClick={goOrScroll('#contact')}>Contacto</a></li>
+          <li>
+            <button onClick={() => navigate('/sucursal')} className="px-2 py-1 rounded border border-[#ff6600] text-[#ff6600] hover:bg-[#ff6600]/10 transition">Sucursal</button>
+          </li>
         </ul>
         {/* Mobile menu button */}
         <button className="md:hidden p-2 rounded border-2 border-[#ff6600] focus:outline-none" onClick={() => setOpen(!open)} aria-label="Abrir menú">
@@ -97,6 +100,9 @@ const Navbar: React.FC = () => {
           <li><a href="#financing" className="block py-2 px-3 rounded hover:bg-[#ff6600] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#financing')(e); }}>Financiaciones</a></li>
           <li><a href="#reviews" className="block py-2 px-3 rounded hover:bg-[#ff6600] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#reviews')(e); }}>Referencias</a></li>
           <li><a href="#contact" className="block py-2 px-3 rounded hover:bg-[#ff6600] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#contact')(e); }}>Contacto</a></li>
+          <li className="pt-2 border-t border-gray-200">
+            <button onClick={() => { setOpen(false); navigate('/sucursal'); }} className="w-full py-2 rounded border border-[#ff6600] text-[#ff6600]">Elegir sucursal</button>
+          </li>
         </ul>
       </div>
       <style>{`

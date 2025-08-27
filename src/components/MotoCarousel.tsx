@@ -14,7 +14,6 @@ type Moto = {
 
 type MotoCarouselProps = {
   motos: Moto[]
-  title: string
 }
 
 const ArrowLeft = () => (
@@ -43,7 +42,7 @@ const CloseIcon = () => (
   </svg>
 )
 
-const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
+const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
   const [current, setCurrent] = useState(0)
   const [showModal, setShowModal] = useState(false)
   const [modalMoto, setModalMoto] = useState<Moto | null>(null)
@@ -268,10 +267,9 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
 
   return (
     <div className="mb-20">
-      {/* Título principal mejorado */}
-      <div className="text-center mb-10">
-        <h2 className="text-3xl md:text-4xl font-extrabold tracking-wide text-gray-900">{title}</h2>
-        <div className="mt-3 w-20 h-1 bg-primary mx-auto rounded-full" />
+      {/* Separador superior */}
+      <div className="text-center mb-6">
+        <div className="w-20 h-1 bg-primary mx-auto rounded-full" />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto px-4">
@@ -326,8 +324,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
                 <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{motos[current].name}</h3>
                 <div className="flex items-center justify-center gap-4 text-primary">
                   <div className="flex items-center gap-1">
-                    <ZapIcon />
-                    <span className="font-semibold">{motos[current].cc}cc</span>
+                    <span className="font-semibold">Colores :</span>
                   </div>
                   {motos[current].isQuad && (
                     <span className="bg-primary text-white px-3 py-1 rounded-full text-sm font-bold">
@@ -374,14 +371,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
                   />
 
 
-                  {/* Indicador de deslizamiento en mobile */}
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 md:hidden">
-                    <div className="flex gap-1">
-                      <div className="w-8 h-1 bg-white/50 rounded-full"></div>
-                      <div className="w-8 h-1 bg-white/30 rounded-full"></div>
-                      <div className="w-8 h-1 bg-white/50 rounded-full"></div>
-                    </div>
-                  </div>
+                  {/* Indicador de deslizamiento en mobile (removido a pedido) */}
                 </div>
 
                 {/* Colores fuera de la imagen (moved arriba junto a cc) */}
@@ -400,35 +390,33 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, title }) => {
                       onFocus={handleFocus}
                       onBlur={handleBlur}
                       className={`transition-all duration-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary ${
-                        idx === current ? "w-3 h-3 bg-primary shadow" : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
+                        idx === current ? "w-3 h-3 bg-[#ff6600] shadow" : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
                       }`}
                     />
                   ))}
                   {/* Texto indicativo en mobile */}
-                  <div className="md:hidden absolute -bottom-6 left-1/2 -translate-x-1/2">
-                    <p className="text-xs text-gray-500 text-center">Desliza para ver más</p>
-                  </div>
+                  {/* Mensaje mobile removido */}
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Lista lateral mejorada */}
-        <div className="lg:w-80">
+        {/* Lista lateral mejorada (oculta en mobile) */}
+        <div className="hidden md:block lg:w-80">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden ring-1 ring-gray-200/60">
             <div className="bg-gradient-to-r from-orange-500 to-red-500 p-4">
               <h4 className="text-white font-bold text-lg">Modelos Disponibles</h4>
             </div>
-            <div className="max-h-[500px] overflow-y-auto">
-              <ul className="flex md:flex-col flex-row gap-2 md:gap-0 w-auto md:w-full min-w-0 justify-center md:justify-start overflow-x-auto scrollbar-hide scroll-px-2">
+            <div className="max-h-[500px] overflow-y-auto scrollbar-hide">
+              <ul className="flex flex-col gap-0 w-full justify-start overflow-x-visible">
                 {(isMobile ? infiniteMotos : motos).map((moto, idx) => (
                   <li
                     key={moto.id + "-" + idx}
                     ref={(el) => {
                       itemRefs.current[idx] = el
                     }}
-                    className={`moto-list-item cursor-pointer px-4 py-2 rounded-lg font-semibold text-base md:text-lg transition-colors select-none whitespace-nowrap min-w-max w-auto md:w-full md:p-4 md:text-left md:border-b md:border-gray-100 md:last:border-b-0 md:rounded-none ${
+                    className={`moto-list-item cursor-pointer px-4 py-2 rounded-lg font-semibold text-base md:text-lg transition-colors select-none whitespace-normal w-full md:w-full md:p-4 md:text-left md:border-b md:border-gray-100 md:last:border-b-0 md:rounded-none ${
                       (isMobile ? idx % motos.length : idx) === current
                         ? "bg-gray-50 text-gray-900 md:bg-transparent md:border-l-4 md:border-l-primary md:text-primary"
                         : "bg-gray-100 text-gray-800 hover:bg-gray-50 md:bg-transparent"

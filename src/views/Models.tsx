@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SectionTitle from '../components/SectionTitle';
-import motorbikesData from '../data/motorbikes.json';
+import motorbikesVenado from '../data/motorbikesVenado.json';
+import motorbikesParana from '../data/motorbikesParana.json';
 import { Link, useSearchParams } from 'react-router-dom';
 
 type Moto = {
@@ -23,18 +24,20 @@ const Models: React.FC = () => {
   }, []);
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const branch = (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado') || 'venado';
+  const data = branch === 'parana' ? (motorbikesParana as Moto[]) : (motorbikesVenado as Moto[]);
   const [query, setQuery] = useState<string>(searchParams.get('q') || '');
   const [cc, setCc] = useState<string>(searchParams.get('cc') || '');
   const [onlyQuads, setOnlyQuads] = useState<boolean>(searchParams.get('quads') === '1');
 
   const ccOptions = useMemo(() => {
-    const all = (motorbikesData as Moto[]).map(m => m.cc)
+    const all = data.map(m => m.cc)
     const unique = Array.from(new Set(all)).sort((a, b) => a - b)
     return unique
   }, [])
 
   const filtered = useMemo(() => {
-    let list = (motorbikesData as Moto[]).slice();
+    let list = data.slice();
     if (query.trim()) {
       const q = query.trim().toLowerCase();
       list = list.filter(m => m.name.toLowerCase().includes(q));
@@ -47,7 +50,7 @@ const Models: React.FC = () => {
       list = list.filter(m => m.isQuad);
     }
     return list;
-  }, [query, cc, onlyQuads]);
+  }, [query, cc, onlyQuads, data]);
 
   const updateParams = (next: Partial<{ q: string; cc: string; quads: string }>) => {
     const newParams = new URLSearchParams(searchParams);
