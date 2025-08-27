@@ -62,6 +62,7 @@ const financingOptions = [
 
 
 
+
 const Landing: React.FC = () => {
   const [randomReviews, setRandomReviews] = useState<typeof reviewsData>([]);
   const branch = (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado') || 'venado';
