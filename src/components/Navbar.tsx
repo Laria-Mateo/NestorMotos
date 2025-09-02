@@ -5,6 +5,7 @@ const Navbar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [show, setShow] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const branch = (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado') || 'venado';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,7 +58,7 @@ const Navbar: React.FC = () => {
             className="focus:outline-none"
           >
             <img
-              src="/logoSinFondo2.webp"
+              src={branch === 'parana' ? '/logoSinFondo3.webp' : '/logoSinFondo2.webp'}
               alt="Logo Nestor Motos"
               className="w-40 md:w-56 h-auto object-contain bg-transparent cursor-pointer"
               draggable="false"

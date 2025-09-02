@@ -38,7 +38,7 @@ const getRandomReviews = (reviews: typeof reviewsData, count: number) => {
 
 const groupMotosByCategory = (motos: Moto[]): MotoCategories => {
   return {
-    cc110: motos.filter((m) => m.cc === 110 && !m.isQuad),
+    cc110: motos.filter((m) => m.cc <= 110 && !m.isQuad),
     cc125_150: motos.filter((m) => (m.cc === 125 || m.cc === 150) && !m.isQuad),
     cc250plus: motos.filter((m) => m.cc >= 250 && !m.isQuad),
     quads: motos.filter((m) => m.isQuad),
@@ -152,7 +152,7 @@ const Landing: React.FC = () => {
             <div className="flex flex-col items-center gap-4">
               
               <img
-                src="/logoSinFondo2.webp"
+                src={branch === 'parana' ? '/logoSinFondo3.webp' : '/logoSinFondo2.webp'}
                 alt="Logo Nestor Motos"
                 className="h-16 md:h-20 w-auto object-contain shadow-lg mb-4"
                 draggable="false"

@@ -1,11 +1,12 @@
 import React from 'react';
 
 const Footer: React.FC = () => {
+  const branch = (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado') || 'venado';
   return (
     <footer className="w-full bg-black text-white pt-10 pb-0 mt-12 shadow-inner">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex flex-col items-center mb-8">
-          <img src="/logoSinFondo2.webp" alt="Logo Nestor Motos" className="h-20 w-auto object-contain" draggable="false" />
+          <img src={branch === 'parana' ? '/logoSinFondo3.webp' : '/logoSinFondo2.webp'} alt="Logo Nestor Motos" className="h-20 w-auto object-contain" draggable="false" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-white/20 pt-8">
           <div>
