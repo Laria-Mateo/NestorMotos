@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import motorbikesVenado from '../data/motorbikesVenado.json';
 import motorbikesParana from '../data/motorbikesParana.json';
 
-// const WHATSAPP_PARANA = '5493433007984'; // Paraná (comentado temporalmente)
-const WHATSAPP_VENADO = '5493462669136'; // Venado Tuerto
+const WHATSAPP_PARANA = '5493433007984'; // Paraná
+const WHATSAPP_VENADO = '5493462252244'; // Venado Tuerto
 
-// Sitio actual: Venado Tuerto por defecto, pero aceptamos prellenado desde cualquier ID
-const allMotorbikes = [...motorbikesVenado, ...motorbikesParana];
+// Sitio actual: usar siempre dataset de Paraná
+const allMotorbikes = [...motorbikesParana];
 
 const ContactForm: React.FC = () => {
   const [nombre, setNombre] = useState('');
@@ -23,9 +22,8 @@ const ContactForm: React.FC = () => {
   const [touched, setTouched] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
-  // Determinar sucursal actual para separar el catálogo en el formulario
-  const branch = (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado') || 'venado';
-  const dataset = branch === 'parana' ? motorbikesParana : motorbikesVenado;
+  // Usar siempre Paraná
+  const dataset = motorbikesParana;
 
   // Opciones de cilindrada y modelos filtradas por sucursal
   const cilindradasUnicas = useMemo(() => Array.from(new Set(dataset.map(m => m.cc))).sort((a, b) => a - b), [dataset]);
@@ -77,11 +75,12 @@ const ContactForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowErrors(false);
+    const branch = (typeof window !== 'undefined' ? (localStorage.getItem('branch') || 'parana') : 'parana');
+    const phone = branch === 'parana' ? WHATSAPP_PARANA : WHATSAPP_VENADO;
     let mensaje = `Hola! Mi nombre es ${nombre} ${apellido}.\n`;
     mensaje += `DNI: ${dni}.\n`;
     mensaje += `Tengo ${mayor21 === 'si' ? 'más' : 'menos'} de 21 años.\n`;
-    // Sitio exclusivo Venado Tuerto
-    mensaje += `Sucursal: Venado Tuerto.\n`;
+    mensaje += `Sucursal: ${branch === 'parana' ? 'Paraná' : 'Venado Tuerto'}.\n`;
     if (usadas) {
       mensaje += `Quiero consultar por motos usadas.\n`;
     } else {
@@ -93,7 +92,7 @@ const ContactForm: React.FC = () => {
       mensaje += `Observaciones: ${observaciones}`;
     }
     // Formato correcto para wa.me: https://wa.me/NUMERO?text=MENSAJE
-    const url = `https://wa.me/${WHATSAPP_VENADO.replace('+','')}?text=${encodeURIComponent(mensaje)}`;
+    const url = `https://wa.me/${phone.replace('+','')}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   };
 
@@ -207,7 +206,7 @@ const ContactForm: React.FC = () => {
       
       <button
         type="submit"
-        className="flex items-center justify-center gap-2 bg-[#ff6600] hover:bg-[#ff944d] text-white font-bold rounded-xl py-3 text-lg shadow-md border border-[#ff6600]/70 focus:outline-none focus:ring-2 focus:ring-[#ff6600] transition w-full disabled:opacity-50 mt-2"
+        className="flex items-center justify-center gap-2 bg-[#f75000] hover:bg-[#ff7a33] text-white font-bold rounded-xl py-3 text-lg shadow-md border border-[#f75000]/70 focus:outline-none focus:ring-2 focus:ring-[#f75000] transition w-full disabled:opacity-50 mt-2"
         disabled={!isFormValid}
         onClick={isFormValid ? undefined : handleDisabledClick}
       >

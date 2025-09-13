@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import motorbikesVenado from '../data/motorbikesVenado.json';
 import motorbikesParana from '../data/motorbikesParana.json';
 import useEmblaCarousel from 'embla-carousel-react';
 
@@ -30,8 +29,8 @@ const ModelDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Buscar el modelo en ambos datasets para soportar IDs únicos por sucursal (v*/p*)
-  const allMotorbikes: Moto[] = [...(motorbikesVenado as Moto[]), ...(motorbikesParana as Moto[])];
+  // Usar siempre el dataset de Paraná
+  const allMotorbikes: Moto[] = [...(motorbikesParana as Moto[])];
   const moto = allMotorbikes.find((m) => m.id === id);
 
   // Asegurar que al entrar a un modelo el scroll inicia arriba
@@ -41,10 +40,8 @@ const ModelDetail: React.FC = () => {
 
   const related: Moto[] = useMemo(() => {
     if (!moto) return [] as Moto[];
-    // Usar el dataset de la misma sucursal del modelo para "Relacionados"
-    const dataset: Moto[] = moto.id.startsWith('p')
-      ? (motorbikesParana as Moto[])
-      : (motorbikesVenado as Moto[]);
+    // Usar siempre Paraná para "Relacionados"
+    const dataset: Moto[] = (motorbikesParana as Moto[]);
     return dataset
       .filter((m) => m.id !== moto.id && m.isQuad === moto.isQuad)
       .sort((a, b) => Math.abs(a.cc - moto.cc) - Math.abs(b.cc - moto.cc))

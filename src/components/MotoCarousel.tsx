@@ -42,6 +42,8 @@ const CloseIcon = () => (
   </svg>
 )
 
+// Título limpiado (no usado actualmente)
+
 const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
   const [current, setCurrent] = useState(0)
   const [showModal, setShowModal] = useState(false)
@@ -51,7 +53,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
   const [isTouching, setIsTouching] = useState(false)
   const [hasFocus, setHasFocus] = useState(false)
   const [isManualChange, setIsManualChange] = useState(false)
-  const length = motos.length
+  const length = Array.isArray(motos) ? motos.length : 0
   // const navigate = useNavigate()
 
   // Ref para los ítems de la lista
@@ -92,7 +94,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
   }
 
   const handlePrev = () => {
-    if (isAnimating) return
+    if (isAnimating || length === 0) return
     setIsAnimating(true)
     setIsManualChange(true) // Marcar como cambio manual
     setCurrent((prev) => (prev - 1 + length) % length)
@@ -100,7 +102,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
   }
 
   const handleNext = () => {
-    if (isAnimating) return
+    if (isAnimating || length === 0) return
     setIsAnimating(true)
     setIsManualChange(true) // Marcar como cambio manual
     setCurrent((prev) => (prev + 1) % length)
@@ -108,7 +110,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
   }
 
   const handleAutoNext = () => {
-    if (isAnimating) return
+    if (isAnimating || length === 0) return
     setIsAnimating(true)
     // NO marcar como manual para evitar scroll
     setCurrent((prev) => (prev + 1) % length)
@@ -135,13 +137,20 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
 
   // Para lista infinita en mobile
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768
-  const repeatCount = isMobile && motos.length > 1 ? 3 : 1
-  const infiniteMotos = isMobile && motos.length > 1 ? Array(repeatCount).fill(motos).flat() : motos
+  const repeatCount = isMobile && length > 1 ? 3 : 1
+  const infiniteMotos = isMobile && length > 1 ? Array(repeatCount).fill(motos).flat() : motos
+
+  // Si la lista cambia y el índice queda fuera de rango, resetear
+  useEffect(() => {
+    if (current >= length && length > 0) {
+      setCurrent(0)
+    }
+  }, [length, current])
 
   // Ajustar el scroll automático para centrar el ítem activo en mobile
   useEffect(() => {
-    if (isMobile && isManualChange && itemRefs.current[current + motos.length]) {
-      itemRefs.current[current + motos.length]?.scrollIntoView({
+    if (isMobile && isManualChange && itemRefs.current[current + length]) {
+      itemRefs.current[current + length]?.scrollIntoView({
         behavior: "smooth",
         inline: "center",
         block: "nearest",
@@ -151,7 +160,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
     if (isManualChange) {
       setIsManualChange(false)
     }
-  }, [current, isMobile, motos.length, isManualChange])
+  }, [current, isMobile, length, isManualChange])
 
   // Auto-play mejorado con lógica de pausa
   useEffect(() => {
@@ -183,7 +192,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
     Verde: "#10b981",
     Amarillo: "#f59e0b",
     Gris: "#6b7280",
-    Naranja: "#ff6600",
+    Naranja: "#f75000",
   }
 
   // Modal de detalles
@@ -204,23 +213,6 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <a
-                  href={`/modelos/${moto.id}`}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.location.assign(`/modelos/${moto.id}`);
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.location.assign(`/modelos/${moto.id}`);
-                  }}
-                  className="inline-flex items-center gap-1 bg-[#ff6600] text-white font-semibold px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-sm hover:bg-[#ff944d] active:bg-[#cc5200] focus:outline-none focus:ring-2 focus:ring-[#ff6600]/40 text-sm md:text-base select-none"
-                >
-                  Más info
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
-                </a>
                 <button
                   onClick={onClose}
                   className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-all duration-200"
@@ -258,12 +250,34 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
             />
             {/* Marca de agua removida */}
           </div>
+
+          {/* Botón Más info debajo de la imagen */}
+          <div className="px-8 pb-8 bg-white">
+            <a
+              href={`/modelos/${moto.id}`}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.assign(`/modelos/${moto.id}`);
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.assign(`/modelos/${moto.id}`);
+              }}
+              className="mx-auto block w-full max-w-xs text-center bg-[#f75000] text-white font-semibold px-6 py-3 rounded-full shadow-sm hover:bg-[#ff7a33] active:bg-[#cc3f00] focus:outline-none focus:ring-2 focus:ring-[#f75000]/40 text-base select-none"
+            >
+              Más info
+            </a>
+          </div>
         </div>
       </div>
     </div>
   )
 
   if (length === 0) return null
+
+  const activeMoto: Moto | undefined = length > 0 ? motos[current] : undefined
 
   return (
     <div className="mb-20">
@@ -319,32 +333,6 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
 
             {/* Contenido principal */}
             <div className="relative p-8 md:p-12">
-              {/* Nombre de la moto mejorado */}
-              <div className="text-center mb-6">
-                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{motos[current].name}</h3>
-                <div className="flex items-center justify-center gap-4 text-primary">
-                  <div className="flex items-center gap-1">
-                    <span className="font-semibold">Colores :</span>
-                  </div>
-                  {motos[current].isQuad && (
-                    <span className="bg-primary text-white px-3 py-1 rounded-full text-sm font-bold">
-                      QUAD
-                    </span>
-                  )}
-                  {(motos[current] as any).colors && (motos[current] as any).colors.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      {(motos[current] as any).colors.map((color: string, idx: number) => (
-                        <span
-                          key={color + idx}
-                          className={`inline-block w-3.5 h-3.5 rounded-full border ${color === "Blanco" ? "border-gray-300" : "border-white"}`}
-                          style={{ background: colorMap[color] || "#ccc" }}
-                          title={color}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
 
               {/* Imagen principal mejorada */}
               <div
@@ -355,15 +343,17 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
                 onClick={() => {
                   // Solo abrir modal en desktop o si no hay movimiento táctil
                   if (!isMobile || (touchStartX.current === null && touchEndX.current === null)) {
-                    setShowModal(true)
-                    setModalMoto(motos[current])
+                    if (activeMoto) {
+                      setShowModal(true)
+                      setModalMoto(activeMoto)
+                    }
                   }
                 }}
               >
                 <div className="relative">
                   <img
-                    src={motos[current].image || "/placeholder.svg"}
-                    alt={motos[current].name}
+                    src={activeMoto?.image || "/placeholder.svg"}
+                    alt={activeMoto?.name || "Modelo"}
                     className={`w-full h-[400px] md:h-[500px] object-contain transition-transform duration-500 ${
                       isAnimating ? "scale-95" : "md:group-hover:scale-105"
                     }`}
@@ -376,6 +366,23 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
 
                 {/* Colores fuera de la imagen (moved arriba junto a cc) */}
               </div>
+
+              {/* Colores debajo de la imagen */}
+              {activeMoto && (activeMoto as any).colors && (activeMoto as any).colors.length > 0 && (
+                <div className="mt-4 flex items-center justify-center gap-3">
+                  <span className="text-sm font-semibold text-gray-700">Colores :</span>
+                  <div className="flex items-center gap-2">
+                    {(activeMoto as any).colors.map((color: string, idx: number) => (
+                      <span
+                        key={color + idx}
+                        className={`inline-block w-3.5 h-3.5 rounded-full border ${color === "Blanco" ? "border-gray-300" : "border-white"}`}
+                        style={{ background: colorMap[color] || "#ccc" }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Indicadores mejorados */}
               {length > 1 && (
@@ -390,7 +397,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
                       onFocus={handleFocus}
                       onBlur={handleBlur}
                       className={`transition-all duration-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary ${
-                        idx === current ? "w-3 h-3 bg-[#ff6600] shadow" : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
+                        idx === current ? "w-3 h-3 bg-[#f75000] shadow" : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
                       }`}
                     />
                   ))}
@@ -405,7 +412,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
         {/* Lista lateral mejorada (oculta en mobile) */}
         <div className="hidden md:block lg:w-80">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden ring-1 ring-gray-200/60">
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 p-4">
+            <div className="bg-[#f75000] p-4">
               <h4 className="text-white font-bold text-lg">Modelos Disponibles</h4>
             </div>
             <div className="max-h-[500px] overflow-y-auto scrollbar-hide">
@@ -417,13 +424,13 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
                       itemRefs.current[idx] = el
                     }}
                     className={`moto-list-item cursor-pointer px-4 py-2 rounded-lg font-semibold text-base md:text-lg transition-colors select-none whitespace-normal w-full md:w-full md:p-4 md:text-left md:border-b md:border-gray-100 md:last:border-b-0 md:rounded-none ${
-                      (isMobile ? idx % motos.length : idx) === current
-                        ? "bg-gray-50 text-gray-900 md:bg-transparent md:border-l-4 md:border-l-primary md:text-primary"
-                        : "bg-gray-100 text-gray-800 hover:bg-gray-50 md:bg-transparent"
+                      (isMobile ? idx % length : idx) === current
+                        ? "bg-[#f75000]/10 text-[#f75000]"
+                        : "bg-white text-gray-900 hover:bg-gray-50"
                     }`}
                     onClick={() => {
                       setIsManualChange(true)
-                      setCurrent(isMobile ? idx % motos.length : idx)
+                      setCurrent(isMobile ? idx % length : idx)
                     }}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
@@ -431,19 +438,15 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
                   >
                     <div className="md:flex md:items-center md:justify-between">
                       <div>
-                        <h5 className={`font-semibold md:block ${(isMobile ? idx % motos.length : idx) === current ? "md:text-primary" : "md:text-gray-800"}`}>
+                        <h5 className="font-semibold">
                           {moto.name}
                         </h5>
                         <div className="hidden md:flex md:items-center md:gap-2 md:mt-1">
-                          <span className="text-sm text-gray-600">{moto.cc}cc</span>
                           {moto.isQuad && (
                             <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">QUAD</span>
                           )}
                         </div>
                       </div>
-                      {(isMobile ? idx % motos.length : idx) === current && (
-                        <div className="hidden md:block w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
-                      )}
                     </div>
                   </li>
                 ))}

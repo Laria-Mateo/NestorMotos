@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SectionTitle from '../components/SectionTitle';
-import motorbikesVenado from '../data/motorbikesVenado.json';
 import motorbikesParana from '../data/motorbikesParana.json';
 import { Link, useSearchParams } from 'react-router-dom';
 
@@ -25,7 +24,8 @@ const Models: React.FC = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const branch = (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado') || 'venado';
-  const data = branch === 'parana' ? (motorbikesParana as Moto[]) : (motorbikesVenado as Moto[]);
+  // Usar siempre dataset de Paraná
+  const data = (motorbikesParana as Moto[]);
   const [query, setQuery] = useState<string>(searchParams.get('q') || '');
   const [cc, setCc] = useState<string>(searchParams.get('cc') || '');
   const [onlyQuads, setOnlyQuads] = useState<boolean>(searchParams.get('quads') === '1');

@@ -1,0 +1,143 @@
+[
+  {
+    "id": 1,
+    "title": "Honda Tornado XR300L: ficha, novedades y lo nuevo en Argentina",
+    "blocks": [
+      { "type": "image", "src": "/motorbikes/blog/xr300/hondaXr300-1.png", "alt": "Honda XR300 frontal", "caption": "Nueva XR300L en color rojo" },
+      { "type": "paragraph", "html": "La <strong>Honda Tornado XR300L</strong> es la evolución de la XR250: más potencia, tecnología y seguridad para uso mixto ciudad/tierra, manteniendo la esencia aventurera de la familia XR." },
+      { "type": "heading", "level": 2, "text": "Lo clave en 30 segundos" },
+      { "type": "keypoints", "items": [
+        "<strong>Motor 293,5 cc</strong> con inyección PGM‑FI (24,3 HP y 26,5 Nm)",
+        "<strong>Caja de 6</strong> con <strong>embrague asistido y anti‑rebote</strong>",
+        "<strong>ABS doble canal</strong>, discos 256/220 mm",
+        "<strong>Tablero digital</strong> + iluminación <strong>full LED</strong>"
+      ] },
+      { "type": "hr" },
+      { "type": "heading", "level": 2, "text": "Motor y rendimiento" },
+      { "type": "table", "rows": [
+        { "label": "Tipo", "value": "Mono 4T, 4 válvulas, OHC, aire/aceite" },
+        { "label": "Cilindrada", "value": "293,5 cc" },
+        { "label": "Potencia", "value": "24,3 HP @ 7.500 rpm" },
+        { "label": "Torque", "value": "26,5 Nm @ 5.750 rpm" },
+        { "label": "Alimentación", "value": "Inyección electrónica PGM‑FI" }
+      ] },
+      { "type": "heading", "level": 2, "text": "Transmisión" },
+      { "type": "table", "rows": [
+        { "label": "Caja", "value": "6 velocidades" },
+        { "label": "Embrague", "value": "Asistido con función anti‑rebote" }
+      ] },
+      { "type": "heading", "level": 2, "text": "Chasis, suspensión y frenos" },
+      { "type": "table", "rows": [
+        { "label": "Delantera", "value": "Horquilla Showa, 221 mm recorrido" },
+        { "label": "Trasera", "value": "Pro‑Link Showa (7 posiciones), 227 mm" },
+        { "label": "Frenos", "value": "Discos 256 / 220 mm, pinzas Nissin" },
+        { "label": "ABS", "value": "Doble canal" }
+      ] },
+      { "type": "image", "src": "/motorbikes/blog/xr300/hondaXr300-2.webp", "alt": "Honda XR300 lateral", "caption": "Perfil, suspensión y postura mejoradas" },
+      { "type": "heading", "level": 2, "text": "Tecnología y equipamiento" },
+      { "type": "list", "ordered": false, "items": [
+        "Iluminación full LED delantera y trasera",
+        "Tablero 100% digital con tacómetro, indicador de marcha y consumos"
+      ] },
+      { "type": "heading", "level": 2, "text": "Medidas y capacidades" },
+      { "type": "table", "rows": [
+        { "label": "Dimensiones (L × A × H)", "value": "2.202 × 828 × 1.298 mm" },
+        { "label": "Distancia entre ejes", "value": "1.429 mm" },
+        { "label": "Altura del asiento", "value": "890 mm" },
+        { "label": "Peso", "value": "153 kg" },
+        { "label": "Tanque", "value": "13,8 L" }
+      ] },
+      { "type": "heading", "level": 2, "text": "Colores y producción" },
+      { "type": "paragraph", "html": "Disponible en <strong>rojo</strong>, <strong>blanco</strong> y <strong>gris</strong>. Se <strong>fabrica en Campana</strong> (Buenos Aires) y se exportará a <strong>14 países</strong>." },
+      { "type": "quote", "text": "Lista para todo: ciudad y tierra, con más control y confort." },
+      { "type": "cta", "href": "/#contacto", "label": "Consultar disponibilidad" }
+    ],
+    "html": "",
+    "seo": {
+      "description": "Honda Tornado XR300L en Argentina: motor 293,5 cc, ABS doble canal, LED, tablero digital, tanque 13,8 L. Fabricada en Campana.",
+      "keywords": ["Honda Tornado XR300L", "XR300", "ficha técnica", "Tornado 300", "Honda XR 300 Argentina"],
+      "image": "/motorbikes/Parana/HondaXR300.webp"
+    }
+  },
+  {
+    "id": 2,
+    "title": "Honda NAVi: urbana, compacta y divertida",
+    "blocks": [
+      { "type": "image", "src": "/motorbikes/Parana/HondaNavi110.webp", "alt": "Honda NAVi", "caption": "Compacta, divertida y práctica para todos los días" },
+      { "type": "paragraph", "html": "La <strong>Honda NAVi</strong> es una mini urbana que combina la facilidad de manejo de un scooter con el look de una moto. Ideal para la ciudad por su tamaño compacto y agilidad." },
+      { "type": "keypoints", "items": [
+        "<strong>Motor 110 cc</strong> eficiente",
+        "<strong>Transmisión automática (CVT)</strong>",
+        "Muy <strong>bajo consumo</strong>",
+        "Tamaño <strong>ultracompacto</strong> para la ciudad"
+      ] },
+      { "type": "heading", "level": 2, "text": "Motor y características" },
+      { "type": "list", "ordered": false, "items": [
+        "Motor 110 cc",
+        "Transmisión automática (CVT)",
+        "Tablero simple y funcional",
+        "Consumo muy bajo"
+      ] },
+      { "type": "heading", "level": 2, "text": "¿Para quién es?" },
+      { "type": "paragraph", "html": "Pensada para quienes buscan su primera moto o una alternativa súper práctica para moverse a diario, con estilo propio." },
+      { "type": "quote", "text": "Tan simple como subirte y acelerar: cero complicaciones." },
+      { "type": "cta", "href": "/#contacto", "label": "Quiero una NAVi" }
+    ],
+    "html": "",
+    "seo": {
+      "description": "Honda NAVi: 110 cc, automática, práctica y con estilo urbano. Ideal para la ciudad.",
+      "keywords": ["Honda NAVi", "NAVi 110", "moto urbana", "automática"],
+      "image": "/motorbikes/Parana/HondaNavi110.webp"
+    }
+  },
+  {
+    "id": 3,
+    "title": "Yamaha XTZ 125: ficha técnica y puntos clave",
+    "blocks": [
+      { "type": "image", "src": "/motorbikes/YamahaXTZ125.webp", "alt": "Yamaha XTZ 125", "caption": "La on/off ágil de Yamaha" },
+      { "type": "paragraph", "html": "La <strong>Yamaha XTZ 125</strong> es una on/off ligera pensada para el día a día y salidas por caminos. Combina motor confiable, bajo consumo y suspensiones de buen recorrido para terrenos irregulares." },
+      { "type": "heading", "level": 2, "text": "Lo clave en 30 segundos" },
+      { "type": "keypoints", "items": [
+        "<strong>Mono 124 cc</strong> SOHC, aire (10 HP y 9,9 Nm)",
+        "<strong>Peso 118 kg</strong> con líquidos",
+        "<strong>Suspensión</strong> telescópica / Monocross, 180 mm",
+        "<strong>Frenos</strong> disco delantero 220 mm y tambor trasero",
+        "<strong>Tanque</strong> 11 L"
+      ] },
+      { "type": "hr" },
+      { "type": "heading", "level": 2, "text": "Motor y rendimiento" },
+      { "type": "table", "rows": [
+        { "label": "Tipo", "value": "Monocilíndrico 4T, SOHC, refrigerado por aire" },
+        { "label": "Cilindrada", "value": "124 cc" },
+        { "label": "Potencia", "value": "10,0 HP @ 7.500 rpm" },
+        { "label": "Torque", "value": "9,9 Nm @ 5.500 rpm" },
+        { "label": "Arranque", "value": "Eléctrico y a pedal" }
+      ] },
+      { "type": "heading", "level": 2, "text": "Chasis, suspensión y frenos" },
+      { "type": "table", "rows": [
+        { "label": "Delantera", "value": "Horquilla telescópica, 180 mm" },
+        { "label": "Trasera", "value": "Monocross basculante, 180 mm" },
+        { "label": "Freno delantero", "value": "Disco hidráulico 220 mm" },
+        { "label": "Freno trasero", "value": "Tambor 130 mm" },
+        { "label": "Neumáticos", "value": "80/90-21 del. · 110/80-18 tras." }
+      ] },
+      { "type": "heading", "level": 2, "text": "Medidas y capacidades" },
+      { "type": "table", "rows": [
+        { "label": "Dimensiones (L × A × H)", "value": "2.090 × 830 × 1.115 mm" },
+        { "label": "Entre ejes", "value": "1.340 mm" },
+        { "label": "Altura del asiento", "value": "840 mm" },
+        { "label": "Altura libre al suelo", "value": "260 mm" },
+        { "label": "Peso en orden de marcha", "value": "118 kg" },
+        { "label": "Tanque", "value": "11 L" }
+      ] },
+      { "type": "cta", "href": "/#contacto", "label": "Consultar XTZ 125" }
+    ],
+    "html": "",
+    "seo": {
+      "description": "Yamaha XTZ 125: 124 cc, 10 HP, 9,9 Nm, disco delantero, 118 kg, tanque 11 L.",
+      "keywords": ["Yamaha XTZ 125", "XTZ125", "Yamaha on/off", "ficha técnica"],
+      "image": "/motorbikes/YamahaXTZ125.webp"
+    }
+  }
+]
+

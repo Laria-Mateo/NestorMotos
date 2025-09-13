@@ -15,15 +15,18 @@ const BranchSelect: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black relative">
-      <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'url(/backgroundVenado.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
-      <div className="relative z-10 max-w-xl w-full px-6 py-10 bg-white/90 backdrop-blur rounded-2xl shadow-xl text-center">
-        <img src="/logoSinFondo2.webp" alt="Néstor Motos" className="h-20 w-auto mx-auto mb-4" />
-        <h1 className="text-2xl md:text-3xl font-extrabold mb-2">Elegí la sucursal</h1>
-        <p className="text-gray-600 mb-6">¿Qué sucursal querés ver?</p>
+    <div className="min-h-screen flex items-center justify-center relative bg-black">
+      <div className="absolute inset-0" style={{ backgroundImage: 'url(/background.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+      <div className="relative z-10 max-w-2xl w-full px-6 py-10 text-center text-white">
+        <img src="/logoSinFondo3.webp" alt="Néstor Motos" className="h-28 md:h-36 w-auto mx-auto mb-6" />
+        <p className="mb-8 text-white text-xl md:text-2xl font-extrabold">¿Qué sucursal querés ver?</p>
         <div className="flex flex-col md:flex-row gap-4 justify-center">
-          <button onClick={() => choose('venado')} className="px-6 py-3 rounded-xl font-bold bg-[#ff6600] text-white hover:bg-[#ff944d] transition">Venado Tuerto</button>
-          <button onClick={() => choose('parana')} className="px-6 py-3 rounded-xl font-bold bg-[#ff6600] text-white hover:bg-[#ff944d] transition">Paraná</button>
+          <button onClick={() => choose('venado')} className="px-8 py-4 rounded-2xl font-extrabold bg-white text-[#f75000] border-8 border-[#201d1d] hover:bg-white/90 transition uppercase tracking-wide text-lg md:text-xl min-w-[260px]">
+            Venado Tuerto, SF
+          </button>
+          <button onClick={() => choose('parana')} className="px-8 py-4 rounded-2xl font-extrabold bg-white text-[#f75000] border-8 border-[#201d1d] hover:bg-white/90 transition uppercase tracking-wide text-lg md:text-xl min-w-[260px]">
+            Paraná, ER
+          </button>
         </div>
       </div>
     </div>

@@ -7,8 +7,9 @@ body {
   @apply font-sans;
 }
 
-body, html {
-  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+/* La fuente por defecto viene de Tailwind (font-sans -> Montserrat) */
+html, body {
+  font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif !important;
 }
 
 .hero-background {
@@ -66,5 +67,31 @@ body, html {
   width: 88px;
   height: 4px;
   border-radius: 9999px;
-  background-image: linear-gradient(to right, #ff6600, #ff944d, #ff6600);
+  background-image: linear-gradient(to right, #f75000, #ff7a33, #f75000);
+}
+
+/* Fondo selección de sucursal: negro con detalles sutiles en #f75000 */
+.branch-select-bg {
+  background-color: #000;
+  background-image:
+    radial-gradient(1200px 800px at 0% 0%, rgba(247, 80, 0, 0.35), transparent 75%),
+    radial-gradient(1200px 800px at 100% 0%, rgba(247, 80, 0, 0.35), transparent 75%),
+    radial-gradient(1200px 800px at 0% 100%, rgba(247, 80, 0, 0.35), transparent 75%),
+    radial-gradient(1200px 800px at 100% 100%, rgba(247, 80, 0, 0.35), transparent 75%),
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(0,0,0,0.78) 100%);
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: auto, auto, auto, auto, 100% 100%;
+}
+
+/* Ajustes del fondo en mobile para que no se vea "aplastado" */
+@media (max-width: 768px) {
+  .branch-select-bg {
+    background-image:
+      radial-gradient(900px 600px at 0% 0%, rgba(247, 80, 0, 0.4), transparent 70%),
+      radial-gradient(900px 600px at 100% 0%, rgba(247, 80, 0, 0.4), transparent 70%),
+      radial-gradient(900px 600px at 0% 100%, rgba(247, 80, 0, 0.4), transparent 70%),
+      radial-gradient(900px 600px at 100% 100%, rgba(247, 80, 0, 0.4), transparent 70%),
+      radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(0,0,0,0.85) 100%);
+    background-size: auto, auto, auto, auto, 100% 100%;
+  }
 }

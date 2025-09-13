@@ -58,7 +58,7 @@ const Navbar: React.FC = () => {
             className="focus:outline-none"
           >
             <img
-              src={branch === 'parana' ? '/logoSinFondo3.webp' : '/logoSinFondo2.webp'}
+              src={branch === 'parana' ? '/logoSinFondo3.webp' : '/logoSinFondo3.webp'}
               alt="Logo Nestor Motos"
               className="w-40 md:w-56 h-auto object-contain bg-transparent cursor-pointer"
               draggable="false"
@@ -67,42 +67,44 @@ const Navbar: React.FC = () => {
         </div>
         {/* Desktop menu */}
         <ul className="hidden md:flex gap-6 font-medium font-sans items-center">
-          <li><a href="#home" className="px-2 py-1 rounded transition hover:text-[#ff6600] hover:underline underline-offset-8 decoration-2 decoration-[#ff6600]" onClick={goOrScroll('#home')}>Inicio</a></li>
-          <li><a href="#about" className="px-2 py-1 rounded transition hover:text-[#ff6600] hover:underline underline-offset-8 decoration-2 decoration-[#ff6600]" onClick={goOrScroll('#about')}>Sobre Nosotros</a></li>
+          <li><a href="#home" className="px-2 py-1 rounded transition hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#home')}>Inicio</a></li>
+          <li><a href="#about" className="px-2 py-1 rounded transition hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#about')}>Sobre Nosotros</a></li>
           <li className="relative group">
-            <a href="#models" className="px-2 py-1 rounded transition hover:text-[#ff6600] hover:underline underline-offset-8 decoration-2 decoration-[#ff6600]" onClick={goOrScroll('#models')}>Modelos</a>
+            <a href="#models" className="px-2 py-1 rounded transition hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#models')}>Modelos</a>
             <div className="absolute left-0 top-full w-56 bg-white shadow-lg ring-1 ring-gray-200 rounded-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition z-50">
               <Link to="/modelos" className="block px-4 py-2 hover:bg-gray-50">Ver todos</Link>
             </div>
           </li>
-          <li><a href="#financing" className="px-2 py-1 rounded transition hover:text-[#ff6600] hover:underline underline-offset-8 decoration-2 decoration-[#ff6600]" onClick={goOrScroll('#financing')}>Financiación</a></li>
-          <li><a href="#reviews" className="px-2 py-1 rounded transition hover:text-[#ff6600] hover:underline underline-offset-8 decoration-2 decoration-[#ff6600]" onClick={goOrScroll('#reviews')}>Referencias</a></li>
-          <li><a href="#contact" className="px-2 py-1 rounded transition hover:text-[#ff6600] hover:underline underline-offset-8 decoration-2 decoration-[#ff6600]" onClick={goOrScroll('#contact')}>Contacto</a></li>
+          <li><a href="#financing" className="px-2 py-1 rounded transition hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#financing')}>Financiación</a></li>
+          <li><a href="#reviews" className="px-2 py-1 rounded transition hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#reviews')}>Referencias</a></li>
+          <li><Link to="/blog" className="px-2 py-1 rounded transition hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]">Blog</Link></li>
+          <li><a href="#contact" className="px-2 py-1 rounded transition hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#contact')}>Contacto</a></li>
           <li>
-            <button onClick={() => navigate('/sucursal')} className="px-2 py-1 rounded border border-[#ff6600] text-[#ff6600] hover:bg-[#ff6600]/10 transition">Sucursal</button>
+            <button onClick={() => navigate('/sucursal')} className="px-2 py-1 rounded border border-[#f75000] text-[#f75000] hover:bg-[#f75000]/10 transition">Sucursal</button>
           </li>
         </ul>
         {/* Mobile menu button */}
-        <button className="md:hidden p-2 rounded border-2 border-[#ff6600] focus:outline-none" onClick={() => setOpen(!open)} aria-label="Abrir menú">
-          <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600">
+        <button className="md:hidden p-2 rounded border-2 border-[#f75000] focus:outline-none" onClick={() => setOpen(!open)} aria-label="Abrir menú">
+          <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#f75000">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
       </div>
       {/* Mobile menu */}
       <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${open ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
-        <ul className="flex flex-col gap-2 px-4 pb-4 bg-gray-100 text-black border-t border-[#ff6600]">
-          <li><a href="#home" className="block py-2 px-3 rounded hover:bg-[#ff6600] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#home')(e); }}>Inicio</a></li>
-          <li><a href="#about" className="block py-2 px-3 rounded hover:bg-[#ff6600] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#about')(e); }}>Sobre Nosotros</a></li>
+        <ul className="flex flex-col gap-2 px-4 pb-4 bg-gray-100 text-black border-t border-[#f75000]">
+          <li><a href="#home" className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#home')(e); }}>Inicio</a></li>
+          <li><a href="#about" className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#about')(e); }}>Sobre Nosotros</a></li>
           <li className="relative">
-            <a href="#models" className="block py-2 px-3 rounded hover:bg-[#ff6600] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#models')(e); }}>Modelos</a>
+            <a href="#models" className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#models')(e); }}>Modelos</a>
             <Link to="/modelos" className="block py-2 px-3 rounded border border-gray-200 mt-1 bg-white text-black">Ver todos</Link>
           </li>
-          <li><a href="#financing" className="block py-2 px-3 rounded hover:bg-[#ff6600] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#financing')(e); }}>Financiaciones</a></li>
-          <li><a href="#reviews" className="block py-2 px-3 rounded hover:bg-[#ff6600] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#reviews')(e); }}>Referencias</a></li>
-          <li><a href="#contact" className="block py-2 px-3 rounded hover:bg-[#ff6600] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#contact')(e); }}>Contacto</a></li>
+          <li><a href="#financing" className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#financing')(e); }}>Financiaciones</a></li>
+          <li><a href="#reviews" className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#reviews')(e); }}>Referencias</a></li>
+          <li><Link to="/blog" onClick={() => setOpen(false)} className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white transition">Blog</Link></li>
+          <li><a href="#contact" className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white transition" onClick={(e) => { e.preventDefault(); setOpen(false); goOrScroll('#contact')(e); }}>Contacto</a></li>
           <li className="pt-2 border-t border-gray-200">
-            <button onClick={() => { setOpen(false); navigate('/sucursal'); }} className="w-full py-2 rounded border border-[#ff6600] text-[#ff6600]">Elegir sucursal</button>
+            <button onClick={() => { setOpen(false); navigate('/sucursal'); }} className="w-full py-2 rounded border border-[#f75000] text-[#f75000]">Elegir sucursal</button>
           </li>
         </ul>
       </div>

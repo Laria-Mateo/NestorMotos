@@ -7,13 +7,13 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#FF6600', // Naranja principal
-          light: '#FF944D',
-          dark: '#CC5200',
+          DEFAULT: '#f75000', // Naranja principal actualizado
+          light: '#ff7a33',
+          dark: '#cc3f00',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
     },
   },

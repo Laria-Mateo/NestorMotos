@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import GoogleReview from '../components/GoogleReview';
+// import GoogleReview from '../components/GoogleReview';
+import ClientsMarquee from '../components/ClientsMarquee';
 import MotoCarousel from '../components/MotoCarousel';
 import FinancingCard from '../components/FinancingCard';
 import ContactForm from '../components/ContactForm';
@@ -10,7 +11,7 @@ import WhatsAppButton from '../components/WhatsAppButton';
 // ... otros imports de componentes (SectionTitle, etc.)
 import SectionTitle from '../components/SectionTitle';
 
-import reviewsData from '../data/googleReviews.json';
+// import reviewsData from '../data/googleReviews.json';
 import motorbikesVenado from '../data/motorbikesVenado.json';
 import motorbikesParana from '../data/motorbikesParana.json';
 
@@ -31,10 +32,10 @@ interface MotoCategories {
   quads: Moto[];
 }
 
-const getRandomReviews = (reviews: typeof reviewsData, count: number) => {
-  const shuffled = [...reviews].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
-};
+// const getRandomReviews = (reviews: typeof reviewsData, count: number) => {
+//   const shuffled = [...reviews].sort(() => 0.5 - Math.random());
+//   return shuffled.slice(0, count);
+// };
 
 const groupMotosByCategory = (motos: Moto[]): MotoCategories => {
   return {
@@ -64,7 +65,7 @@ const financingOptions = [
 
 
 const Landing: React.FC = () => {
-  const [randomReviews, setRandomReviews] = useState<typeof reviewsData>([]);
+  // const [randomReviews, setRandomReviews] = useState<typeof reviewsData>([]);
   const branch = (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado') || 'venado';
   const [motoCategories, setMotoCategories] = useState<MotoCategories>({
     cc110: [],
@@ -75,7 +76,6 @@ const Landing: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'cc110' | 'cc125_150' | 'cc250plus' | 'quads'>('cc110');
 
   useEffect(() => {
-    setRandomReviews(getRandomReviews(reviewsData, 3));
     const data = (branch === 'parana' ? (motorbikesParana as Moto[]) : (motorbikesVenado as Moto[]));
     setMotoCategories(groupMotosByCategory(data));
   }, [branch]);
@@ -152,7 +152,7 @@ const Landing: React.FC = () => {
             <div className="flex flex-col items-center gap-4">
               
               <img
-                src={branch === 'parana' ? '/logoSinFondo3.webp' : '/logoSinFondo2.webp'}
+                src={branch === 'parana' ? '/logoSinFondo3.webp' : '/logoSinFondo3.webp'}
                 alt="Logo Nestor Motos"
                 className="h-16 md:h-20 w-auto object-contain shadow-lg mb-4"
                 draggable="false"
@@ -202,12 +202,12 @@ const Landing: React.FC = () => {
                   </span>
                   <span className="text-lg font-semibold text-black">Horarios: <span className="text-[#ff6600] font-bold">Lun a Vie 8-13hs y 16-20hs, Sáb 9-13hs</span></span>
                 </div>
-                <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
+                { /*<div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
                   <span className="bg-[#ff6600]/10 p-3 rounded-full">
                     <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-4-4h-1" /><circle cx="9" cy="7" r="4" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 11v9" /></svg>
                   </span>
                   <span className="text-lg font-semibold text-black">Casa Central: <span className="text-[#ff6600] font-bold">@nestormotosvenadotuerto Venado Tuerto - SF</span></span>
-                </div>
+                </div>*/}
               </div>
               <div className="flex flex-col gap-4 items-center">
                 {/* MapSwitcher removido; se define por sucursal elegida */}
@@ -279,14 +279,23 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
-        <section id="reviews" className="py-20 bg-gray-100 border-b border-gray-200">
-          <div className="max-w-5xl mx-auto px-4">
-            <SectionTitle>Referencias de Google</SectionTitle>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {randomReviews.map((review) => (
-                <GoogleReview key={review.id} author={review.author} content={review.content} rating={review.rating} />
-              ))}
-            </div>
+        <section
+          id="reviews"
+          className="relative py-20 border-b border-gray-900 overflow-hidden bg-black"
+          style={{
+            backgroundImage: `url(${branch === 'parana' ? '/background2.webp' : '/backgroundVenado.webp'})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/80 z-10" />
+          <div className="absolute inset-0 hero-overlay-radials z-10" />
+          <div className="absolute inset-0 hero-grid z-10" />
+          <div className="absolute inset-0 hero-overlay-vignette z-10" />
+          <div className="relative z-20 max-w-6xl mx-auto px-4">
+            <SectionTitle className="text-white">Algunos de ustedes</SectionTitle>
+            <ClientsMarquee />
+            <p className="mt-6 text-center text-sm text-white/80">Fotos en sucursal Paraná.</p>
           </div>
         </section>
       </main>
