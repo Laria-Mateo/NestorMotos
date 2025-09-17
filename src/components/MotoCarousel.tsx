@@ -254,16 +254,18 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
           {/* Botón Más info debajo de la imagen */}
           <div className="px-8 pb-8 bg-white">
             <a
-              href={`/modelos/${moto.id}`}
+              href={`../modelos/${moto.id}`}
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                window.location.assign(`/modelos/${moto.id}`);
+                const branch = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : 'parana';
+                window.location.assign(`/${branch}/modelos/${moto.id}`);
               }}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                window.location.assign(`/modelos/${moto.id}`);
+                const branch = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : 'parana';
+                window.location.assign(`/${branch}/modelos/${moto.id}`);
               }}
               className="mx-auto block w-full max-w-xs text-center bg-[#f75000] text-white font-semibold px-6 py-3 rounded-full shadow-sm hover:bg-[#ff7a33] active:bg-[#cc3f00] focus:outline-none focus:ring-2 focus:ring-[#f75000]/40 text-base select-none"
             >

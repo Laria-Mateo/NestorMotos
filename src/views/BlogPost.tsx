@@ -82,19 +82,54 @@ const BlogPost: React.FC = () => {
       Object.entries(attrs).forEach(([k, v]) => el!.setAttribute(k, v));
       return el;
     };
+    const ensureLink = (rel: string, href: string) => {
+      let el = Array.from(document.getElementsByTagName('link')).find((l) => l.getAttribute('rel') === rel) as HTMLLinkElement | undefined;
+      if (!el) {
+        el = document.createElement('link');
+        el.setAttribute('rel', rel);
+        document.head.appendChild(el);
+      }
+      el!.setAttribute('href', href);
+      return el!;
+    };
 
-    const desc = post.seo?.description || post.excerpt;
-    const keywords = (post.seo?.keywords || []).join(', ');
+    const desc = post.seo?.description || post.excerpt || `${post.title} - Néstor Motos`;
+    const baseKeywords = (post.seo?.keywords || []);
+    const cities = ['Paraná', 'Venado Tuerto'];
+    const modelTokens = post.title.split(/\s+/).filter(Boolean);
+    const extraKw = [
+      ...cities.flatMap((c) => [
+        `${post.title} ${c}`,
+        `${modelTokens[0] || ''} ${modelTokens[1] || ''} ${c}`.trim(),
+        `${(modelTokens[0] || '').toLowerCase()} ${(modelTokens[1] || '').toLowerCase()} ${c}`.trim(),
+        `ficha técnica ${post.title}`,
+      ]),
+      'precio', 'financiación', '0km', 'usada', 'review', 'novedades'
+    ];
+    const keywords = Array.from(new Set([...baseKeywords, ...extraKw])).join(', ');
     const image = post.seo?.image || post.cover;
 
+    // SEO básicos
     ensureMeta('meta[name="description"]', { name: 'description', content: desc });
     ensureMeta('meta[name="keywords"]', { name: 'keywords', content: keywords });
     ensureMeta('meta[property="og:title"]', { property: 'og:title', content: title });
     ensureMeta('meta[property="og:description"]', { property: 'og:description', content: desc });
     ensureMeta('meta[property="og:image"]', { property: 'og:image', content: image });
 
+    // Canonical consolidado en Paraná para evitar duplicados entre sucursales
+    const loc = typeof window !== 'undefined' ? window.location : undefined;
+    const canonical = loc ? `${loc.origin}/parana/blog/${id}` : `/parana/blog/${id}`;
+    ensureLink('canonical', canonical);
+    ensureMeta('meta[property="og:url"]', { property: 'og:url', content: canonical });
+
+    // Twitter cards
+    ensureMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary_large_image' });
+    ensureMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: title });
+    ensureMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: desc });
+    ensureMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: image });
+
     return () => { document.title = prevTitle; };
-  }, [post]);
+  }, [post, id]);
 
   if (!post) {
     return <div className="min-h-screen bg-white"><div className="max-w-3xl mx-auto px-4 py-16 text-center text-gray-600">Cargando…</div></div>;
@@ -108,7 +143,23 @@ const BlogPost: React.FC = () => {
     datePublished: post.date,
     author: { '@type': 'Person', name: post.author },
     description: post.seo?.description || post.excerpt,
+    mainEntityOfPage: typeof window !== 'undefined' ? `${window.location.origin}/parana/blog/${id}` : `/parana/blog/${id}`,
+    publisher: { '@type': 'Organization', name: 'Néstor Motos' },
+    about: post.title,
+    inLanguage: 'es-AR',
+    articleSection: 'Motos'
   } as const;
+
+  // Breadcrumbs para SEO
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: typeof window !== 'undefined' ? `${window.location.origin}/parana` : '/parana' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: typeof window !== 'undefined' ? `${window.location.origin}/parana/blog` : '/parana/blog' },
+      { '@type': 'ListItem', position: 3, name: post.title, item: typeof window !== 'undefined' ? `${window.location.origin}/parana/blog/${id}` : `/parana/blog/${id}` }
+    ]
+  };
 
   // Calcular tiempo de lectura aproximado (soporta html completo o blocks)
   const hasFullHtml = typeof (post as any).html === 'string' && (post as any).html.trim().length > 0;
@@ -143,9 +194,10 @@ const BlogPost: React.FC = () => {
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <Navbar />
       <div className="max-w-3xl mx-auto px-4 py-10">
+        <div className="p-6 md:p-8">
         <article>
           <header className="mb-6">
             <div className="inline-flex items-center gap-2 text-xs uppercase tracking-wider font-extrabold text-[#f75000]">Novedades</div>
@@ -160,7 +212,7 @@ const BlogPost: React.FC = () => {
                 {/* Instagram link dinámico por sucursal */}
                 <a
                   href={(typeof window !== 'undefined' && (localStorage.getItem('branch') === 'parana'))
-                    ? 'https://www.instagram.com/nestormotos2/'
+                    ? 'https://www.instagram.com/nestormotosparana/'
                     : 'https://www.instagram.com/nestormotosvenadotuerto/'}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -284,7 +336,7 @@ const BlogPost: React.FC = () => {
                 {recommended.map((p) => {
                   const img = (p.seo && p.seo.image) || getFirstImageFromHtml(p.html) || getFirstImageFromBlocks(p.blocks) || '/logoSinFondo3.webp';
                   return (
-                    <a key={p.id} href={`/blog/${p.id}`} className="block bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200/60">
+                    <a key={p.id} href={`../blog/${p.id}`} className="block bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200/60">
                       <img src={img} alt={p.title || 'Nota'} className="w-full aspect-[4/3] object-cover" />
                       <div className="p-3">
                         <div className="text-sm font-semibold text-gray-900 line-clamp-2">{p.title || 'Nota'}</div>
@@ -296,8 +348,10 @@ const BlogPost: React.FC = () => {
             </section>
           )}
         </article>
+        </div>
       </div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
     </div>
   );
 };

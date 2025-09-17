@@ -26,10 +26,10 @@ const colorMap: Record<string, string> = {
 };
 
 const ModelDetail: React.FC = () => {
-  const { id } = useParams();
+  const { id, branch } = useParams();
   const navigate = useNavigate();
 
-  // Usar siempre el dataset de Paraná
+  // Usar siempre el dataset de Paraná (también para Venado)
   const allMotorbikes: Moto[] = [...(motorbikesParana as Moto[])];
   const moto = allMotorbikes.find((m) => m.id === id);
 
@@ -64,7 +64,7 @@ const ModelDetail: React.FC = () => {
         <main className="flex-1 grid place-items-center">
           <div className="text-center p-8">
             <p className="text-gray-700 mb-4">Modelo no encontrado.</p>
-            <Link to="/modelos" className="text-primary font-bold">Volver a modelos</Link>
+            <Link to={`/${branch || (typeof window !== 'undefined' ? (localStorage.getItem('branch') || 'parana') : 'parana')}/modelos`} className="text-primary font-bold">Volver a modelos</Link>
           </div>
         </main>
         <Footer />
@@ -113,7 +113,7 @@ const ModelDetail: React.FC = () => {
 
                 <div className="mt-6">
                   <Link
-                    to={`/?modelId=${encodeURIComponent(moto.id)}#contact`}
+                    to={`/${(branch as string) || (typeof window !== 'undefined' ? (localStorage.getItem('branch') || 'parana') : 'parana')}?modelId=${encodeURIComponent(moto.id)}#contact`}
                     className="inline-block bg-primary text-black font-bold px-6 py-3 rounded-xl shadow hover:bg-primary-light"
                   >
                     Consultar disponibilidad
@@ -135,7 +135,7 @@ const ModelDetail: React.FC = () => {
                   {related.map((r) => (
                     <div key={r.id} className="shrink-0 basis-full pr-4">
                       <Link
-                        to={`/modelos/${r.id}`}
+                        to={`/${(branch as string) || (typeof window !== 'undefined' ? (localStorage.getItem('branch') || 'parana') : 'parana')}/modelos/${r.id}`}
                         className="group bg-white rounded-xl shadow ring-1 ring-gray-200 overflow-hidden hover:shadow-md transition block"
                       >
                         <div className="aspect-[4/3] bg-white flex items-center justify-center">
@@ -154,7 +154,7 @@ const ModelDetail: React.FC = () => {
               <div className="grid grid-cols-4 gap-4">
                 {related.map((r) => (
                   <Link
-                    to={`/modelos/${r.id}`}
+                    to={`/${(branch as string) || (typeof window !== 'undefined' ? (localStorage.getItem('branch') || 'parana') : 'parana')}/modelos/${r.id}`}
                     key={r.id}
                     className="group bg-white rounded-xl shadow ring-1 ring-gray-200 overflow-hidden hover:shadow-md transition block"
                   >

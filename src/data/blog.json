@@ -94,7 +94,7 @@
     "id": 3,
     "title": "Yamaha XTZ 125: ficha técnica y puntos clave",
     "blocks": [
-      { "type": "image", "src": "/motorbikes/YamahaXTZ125.webp", "alt": "Yamaha XTZ 125", "caption": "La on/off ágil de Yamaha" },
+      { "type": "image", "src": "/motorbikes/Parana/YamahaXTZ125.webp", "alt": "Yamaha XTZ 125", "caption": "La on/off ágil de Yamaha" },
       { "type": "paragraph", "html": "La <strong>Yamaha XTZ 125</strong> es una on/off ligera pensada para el día a día y salidas por caminos. Combina motor confiable, bajo consumo y suspensiones de buen recorrido para terrenos irregulares." },
       { "type": "heading", "level": 2, "text": "Lo clave en 30 segundos" },
       { "type": "keypoints", "items": [
@@ -136,7 +136,7 @@
     "seo": {
       "description": "Yamaha XTZ 125: 124 cc, 10 HP, 9,9 Nm, disco delantero, 118 kg, tanque 11 L.",
       "keywords": ["Yamaha XTZ 125", "XTZ125", "Yamaha on/off", "ficha técnica"],
-      "image": "/motorbikes/YamahaXTZ125.webp"
+      "image": "/motorbikes/Parana/YamahaXTZ125.webp"
     }
   }
 ]

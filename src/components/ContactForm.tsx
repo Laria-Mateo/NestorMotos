@@ -20,7 +20,7 @@ const ContactForm: React.FC = () => {
   // const [sucursal, setSucursal] = useState('venado'); // 'parana' | 'venado' (comentado: sitio exclusivo Venado)
   const [showErrors, setShowErrors] = useState(false);
   const [touched, setTouched] = useState(false);
-  const [showHint, setShowHint] = useState(false);
+  
 
   // Usar siempre Paraná
   const dataset = motorbikesParana;
@@ -47,17 +47,28 @@ const ContactForm: React.FC = () => {
           : prev || `Consulta por modelo: ${found.name}`);
       }
     }
-  }, [location.search]);
-
-  // Mostrar ayuda si se llega desde el botón de WhatsApp (desktop)
-  useEffect(() => {
+    // Prellenado desde Usadas
     try {
-      if (sessionStorage.getItem('showFormHint') === '1') {
-        setShowHint(true);
-        sessionStorage.removeItem('showFormHint');
+      const search = new URLSearchParams(location.search);
+      const usedFlag = search.get('used');
+      const usedModel = sessionStorage.getItem('usedModel') || '';
+      const usedYear = sessionStorage.getItem('usedYear') || '';
+      const usedKm = sessionStorage.getItem('usedKm') || '';
+      if (usedFlag === '1') {
+        setUsadas(true);
+        const info = [usedModel && `Modelo: ${usedModel}`, usedYear && `Año: ${usedYear}`, usedKm && `Kilometraje: ${Number(usedKm).toLocaleString()} km`]
+          .filter(Boolean)
+          .join('\n');
+        setObservaciones(info);
+        // limpiar session para evitar "cache"
+        sessionStorage.removeItem('usedModel');
+        sessionStorage.removeItem('usedYear');
+        sessionStorage.removeItem('usedKm');
       }
     } catch {}
-  }, []);
+  }, [location.search]);
+
+  
 
   const isFormValid = nombre && apellido && dni && mayor21 && (usadas || (cilindrada && modelo));
 
@@ -115,12 +126,7 @@ const ContactForm: React.FC = () => {
 
   return (
     <form className="bg-white rounded-2xl shadow-lg p-8 max-w-lg mx-auto flex flex-col gap-7 border border-gray-200 relative" onSubmit={handleSubmit}>
-      {showHint && (
-        <div className="hidden lg:flex absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded-full px-4 py-2 shadow z-10">
-          Completá tu consulta: elegí cilindrada y modelo, o marcá usadas.
-          <button type="button" className="ml-3 text-white/70 hover:text-white" onClick={() => setShowHint(false)}>Cerrar</button>
-        </div>
-      )}
+      
       <div className="flex flex-col md:flex-row gap-5 w-full">
         <div className="flex-1 flex flex-col gap-1">
           <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="nombre">Nombre</label>
@@ -164,6 +170,11 @@ const ContactForm: React.FC = () => {
         <input type="checkbox" checked={usadas} onChange={e => { setUsadas(e.target.checked); setCilindrada(''); setModelo(''); setTouched(true); }} onFocus={() => setTouched(true)} className="accent-primary w-5 h-5" id="usadas" />
         <label htmlFor="usadas" className="font-semibold text-gray-700 text-base select-none">Quiero consultar por motos usadas</label>
       </div>
+      {usadas && (
+        <div className="-mt-2">
+          <a href="/usadas" className="inline-flex items-center px-4 py-2 rounded-xl border-2 border-[#f75000] text-[#f75000] bg-white hover:bg-[#ff7a33]/10 font-bold text-sm transition">Ver usadas</a>
+        </div>
+      )}
       {/* Sucursal (comentado: sitio exclusivo Venado Tuerto)
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-gray-700">Sucursal</label>
@@ -204,6 +215,10 @@ const ContactForm: React.FC = () => {
         <textarea id="observaciones" className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition shadow-sm resize-none w-full" value={observaciones} onChange={e => { setObservaciones(e.target.value); setTouched(true); }} onFocus={() => setTouched(true)} rows={3} placeholder="Ej: Quiero saber por financiación, entrega, requisitos, etc." />
       </div>
       
+      <p className="-mt-2 text-xs text-gray-500 text-center">
+        Los datos ingresados se utilizan únicamente para responder tu consulta y no se almacenan.
+      </p>
+
       <button
         type="submit"
         className="flex items-center justify-center gap-2 bg-[#f75000] hover:bg-[#ff7a33] text-white font-bold rounded-xl py-3 text-lg shadow-md border border-[#f75000]/70 focus:outline-none focus:ring-2 focus:ring-[#f75000] transition w-full disabled:opacity-50 mt-2"

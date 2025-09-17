@@ -23,8 +23,9 @@ const Models: React.FC = () => {
   }, []);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const branch = (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado') || 'venado';
-  // Usar siempre dataset de Paraná
+  const branchPath = (typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : '') as 'parana' | 'venado';
+  const branch = (branchPath || (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado')) || 'venado';
+  // Usar el dataset de Paraná para todas las sucursales
   const data = (motorbikesParana as Moto[]);
   const [query, setQuery] = useState<string>(searchParams.get('q') || '');
   const [cc, setCc] = useState<string>(searchParams.get('cc') || '');

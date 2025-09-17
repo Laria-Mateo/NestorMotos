@@ -11,7 +11,7 @@ const BranchSelect: React.FC = () => {
 
   const choose = (b: 'venado' | 'parana') => {
     try { localStorage.setItem('branch', b) } catch {}
-    navigate('/')
+    navigate(`/${b}`)
   };
 
   return (

@@ -60,9 +60,11 @@ const Blog: React.FC = () => {
   const pageItems = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       <Navbar />
       <div className="max-w-6xl mx-auto px-4 py-10">
+        {/* Contenido */}
+        <div className="p-6 md:p-8">
         <div className="mb-8 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">Blog y Novedades</h1>
           <p className="text-gray-600 mt-2">Últimos lanzamientos, fichas técnicas y noticias del mundo de las motos.</p>
@@ -89,7 +91,7 @@ const Blog: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {pageItems.map((p) => (
               <article key={p.id} className="bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200/60">
-                <Link to={`/blog/${p.id}`} className="block">
+                <Link to={`../blog/${p.id}`} className="block">
                   <img
                     src={(p.seo && p.seo.image) || getFirstImageFromBlocks(p.blocks) || '/logoSinFondo3.webp'}
                     alt={p.title || 'Nota'}
@@ -128,6 +130,7 @@ const Blog: React.FC = () => {
             </button>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

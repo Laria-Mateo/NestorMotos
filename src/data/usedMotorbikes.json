@@ -1,0 +1,28 @@
+[
+  {
+    "id": "used-corven-dax70-2018",
+    "name": "Corven Dax 70",
+    "year": 2018,
+    "km": 13500,
+    "price": 890000,
+    "image": "/motorbikes/Parana/CorvenDax70.webp"
+  },
+  {
+    "id": "used-honda-wave-110-2020",
+    "name": "Honda Wave 110",
+    "year": 2020,
+    "km": 22000,
+    "price": 1250000,
+    "image": "/motorbikes/Parana/HondaWaveBase110.webp"
+  },
+  {
+    "id": "used-rouser-ns160-2019",
+    "name": "Bajaj Rouser NS160",
+    "year": 2019,
+    "km": 30000,
+    "price": 2150000,
+    "image": "/motorbikes/Parana/RouserNS160.webp"
+  }
+]
+
+

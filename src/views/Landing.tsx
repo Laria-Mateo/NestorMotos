@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-// import GoogleReview from '../components/GoogleReview';
+import GoogleReview from '../components/GoogleReview';
 import ClientsMarquee from '../components/ClientsMarquee';
 import MotoCarousel from '../components/MotoCarousel';
 import FinancingCard from '../components/FinancingCard';
@@ -12,6 +12,7 @@ import WhatsAppButton from '../components/WhatsAppButton';
 import SectionTitle from '../components/SectionTitle';
 
 // import reviewsData from '../data/googleReviews.json';
+// Siempre usar el dataset de Paraná también para Venado
 import motorbikesVenado from '../data/motorbikesVenado.json';
 import motorbikesParana from '../data/motorbikesParana.json';
 
@@ -28,7 +29,7 @@ interface Moto {
 interface MotoCategories {
   cc110: Moto[];
   cc125_150: Moto[];
-  cc250plus: Moto[];
+  cc160plus: Moto[];
   quads: Moto[];
 }
 
@@ -41,7 +42,7 @@ const groupMotosByCategory = (motos: Moto[]): MotoCategories => {
   return {
     cc110: motos.filter((m) => m.cc <= 110 && !m.isQuad),
     cc125_150: motos.filter((m) => (m.cc === 125 || m.cc === 150) && !m.isQuad),
-    cc250plus: motos.filter((m) => m.cc >= 250 && !m.isQuad),
+    cc160plus: motos.filter((m) => m.cc >= 160 && !m.isQuad),
     quads: motos.filter((m) => m.isQuad),
   };
 };
@@ -66,17 +67,19 @@ const financingOptions = [
 
 const Landing: React.FC = () => {
   // const [randomReviews, setRandomReviews] = useState<typeof reviewsData>([]);
-  const branch = (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado') || 'venado';
+  // Determinar la sucursal desde la URL; fallback a localStorage
+  const branchFromPath = (typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : '') as 'parana' | 'venado';
+  const branch = (branchFromPath || (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado')) || 'venado';
   const [motoCategories, setMotoCategories] = useState<MotoCategories>({
     cc110: [],
     cc125_150: [],
-    cc250plus: [],
+    cc160plus: [],
     quads: [],
   });
-  const [activeTab, setActiveTab] = useState<'cc110' | 'cc125_150' | 'cc250plus' | 'quads'>('cc110');
+  const [activeTab, setActiveTab] = useState<'cc110' | 'cc125_150' | 'cc160plus' | 'quads'>('cc110');
 
   useEffect(() => {
-    const data = (branch === 'parana' ? (motorbikesParana as Moto[]) : (motorbikesVenado as Moto[]));
+    const data = (motorbikesParana as Moto[]);
     setMotoCategories(groupMotosByCategory(data));
   }, [branch]);
 
@@ -85,18 +88,12 @@ const Landing: React.FC = () => {
 
   // Scroll a cualquier sección si viene con hash
   const location = useLocation();
-  const navigate = useNavigate();
+  
 
-  // Enforce branch selection
+  // En entornos con rutas por sucursal, no forzar redirección
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('branch');
-      if (!saved && !branchChanged) {
-        navigate('/sucursal', { replace: true });
-      }
-      try { if (branchChanged) sessionStorage.removeItem('branchChanged') } catch {}
-    }
-  }, [navigate, branchChanged]);
+    try { if (branchChanged) sessionStorage.removeItem('branchChanged') } catch {}
+  }, [branchChanged]);
   useEffect(() => {
     if (location.hash) {
       const id = location.hash.replace('#', '');
@@ -106,12 +103,33 @@ const Landing: React.FC = () => {
     }
   }, [location]);
 
+  // Prellenado desde /usadas o tarjeta: ?used=1&usedModel=...&usedYear=...&usedKm=...
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(location.search);
+    const used = params.get('used');
+    if (used === '1') {
+      try {
+        sessionStorage.setItem('showFormHint', '1');
+      } catch {}
+      // Guardar en session para que ContactForm lea y prellene
+      const usedModel = params.get('usedModel') || '';
+      const usedYear = params.get('usedYear') || '';
+      const usedKm = params.get('usedKm') || '';
+      try {
+        sessionStorage.setItem('usedModel', usedModel);
+        sessionStorage.setItem('usedYear', usedYear);
+        sessionStorage.setItem('usedKm', usedKm);
+      } catch {}
+    }
+  }, [location.search]);
+
   // Categorías disponibles según sucursal (oculta las vacías)
   const availableCategories = (
     [
       { key: 'cc110' as const, label: '110CC' },
       { key: 'cc125_150' as const, label: '125/150CC' },
-      { key: 'cc250plus' as const, label: '250CC o más' },
+      { key: 'cc160plus' as const, label: '160CC o más' },
       { key: 'quads' as const, label: 'Cuatriciclos' },
     ]
   ).filter(c => (motoCategories[c.key] || []).length > 0);
@@ -196,11 +214,23 @@ const Landing: React.FC = () => {
                   </span>
                   <span className="text-lg font-semibold text-black">Trabajamos <span className="text-[#ff6600] font-bold">todas las marcas</span></span>
                 </div>
-                <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
+                <div className="flex items-start gap-4 bg-gray-50 rounded-xl shadow p-4">
                   <span className="bg-[#ff6600]/10 p-3 rounded-full">
                     <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><circle cx="12" cy="12" r="10" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" /></svg>
                   </span>
-                  <span className="text-lg font-semibold text-black">Horarios: <span className="text-[#ff6600] font-bold">Lun a Vie 8-13hs y 16-20hs, Sáb 9-13hs</span></span>
+                  <div className="text-lg font-semibold text-black">
+                    Horarios
+                    <div className="mt-1 text-base font-normal text-black/80 leading-relaxed">
+                      <div><span className="text-[#ff6600] font-bold">Lunes a Viernes</span>: 08:00–13:00 y 16:00–20:00</div>
+                      <div><span className="text-[#ff6600] font-bold">Sábados</span>: 09:00–13:00</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
+                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17l3-3 3 3M9 7l3 3 3-3" /></svg>
+                  </span>
+                  <span className="text-lg font-semibold text-black">Contamos con <span className="text-[#ff6600] font-bold">taller propio</span></span>
                 </div>
                 { /*<div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
                   <span className="bg-[#ff6600]/10 p-3 rounded-full">
@@ -244,15 +274,21 @@ const Landing: React.FC = () => {
                   {c.label}
                 </button>
               ))}
+              <a
+                href="/usadas"
+                className="px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10"
+              >
+                ¿Querés consultar por usadas?
+              </a>
             </div>
             {activeTab === 'cc110' && <MotoCarousel motos={motoCategories.cc110} />}
             {activeTab === 'cc125_150' && <MotoCarousel motos={motoCategories.cc125_150} />}
-            {activeTab === 'cc250plus' && <MotoCarousel motos={motoCategories.cc250plus} />}
+            {activeTab === 'cc160plus' && <MotoCarousel motos={motoCategories.cc160plus} />}
             {activeTab === 'quads' && <MotoCarousel motos={motoCategories.quads} />}
 
             <div className="mt-6 text-center">
               <Link
-                to="/modelos"
+                to={`/${branch}/modelos`}
                 className="px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10"
               >
                 Ver todos
