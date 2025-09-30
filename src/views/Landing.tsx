@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import GoogleReview from '../components/GoogleReview';
 import ClientsMarquee from '../components/ClientsMarquee';
 import MotoCarousel from '../components/MotoCarousel';
 import FinancingCard from '../components/FinancingCard';
@@ -13,7 +12,6 @@ import SectionTitle from '../components/SectionTitle';
 
 // import reviewsData from '../data/googleReviews.json';
 // Siempre usar el dataset de Paraná también para Venado
-import motorbikesVenado from '../data/motorbikesVenado.json';
 import motorbikesParana from '../data/motorbikesParana.json';
 
 // Definir el tipo de moto

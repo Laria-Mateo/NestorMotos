@@ -23,8 +23,7 @@ const Models: React.FC = () => {
   }, []);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const branchPath = (typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : '') as 'parana' | 'venado';
-  const branch = (branchPath || (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado')) || 'venado';
+  // const branchPath = (typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : '') as 'parana' | 'venado';
   // Usar el dataset de Paraná para todas las sucursales
   const data = (motorbikesParana as Moto[]);
   const [query, setQuery] = useState<string>(searchParams.get('q') || '');
@@ -127,7 +126,7 @@ const Models: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-items-center">
                 {filtered.map((moto) => (
                   <Link
-                    to={`/modelos/${moto.id}`}
+                    to={`${moto.id}`}
                     key={moto.id}
                     className="group bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200 max-w-[320px] md:max-w-[340px] w-full"
                   >

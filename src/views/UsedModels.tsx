@@ -33,6 +33,7 @@ const UsedModels: React.FC = () => {
   }, []);
 
   const list = usedData as UsedMoto[];
+  const hasData = list.length > 0;
   const filtered = useMemo(() => {
     let arr = list.slice();
     const q = query.trim().toLowerCase();
@@ -40,6 +41,29 @@ const UsedModels: React.FC = () => {
     if (year) arr = arr.filter(m => String(m.year) === year);
     return arr;
   }, [list, query, year]);
+
+  const toUsedImagePath = (src: string): string => {
+    if (!src) return '/logoSinFondo3.webp';
+    if (src.startsWith('/motorbikes/used/')) return src;
+    const file = src.split('/').pop() || src;
+    return `/motorbikes/used/${file}`;
+  };
+
+  // Imágenes disponibles en public/motorbikes/used
+  const usedGallery = useMemo(() => ([
+    '/motorbikes/used/USADA1.webp',
+    '/motorbikes/used/USADA2.webp',
+    '/motorbikes/used/USADA3.webp',
+    '/motorbikes/used/USADA4.webp',
+    '/motorbikes/used/USADA 5.webp',
+  ]), []);
+
+  const getDisplayImage = (moto: UsedMoto, index: number): string => {
+    const candidate = toUsedImagePath(moto.image);
+    // Si ya es una de las USADA*.webp o ruta en used, úsala; sino, asignar una de la galería
+    if (candidate.startsWith('/motorbikes/used/')) return candidate;
+    return usedGallery[index % usedGallery.length];
+  };
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingMoto, setPendingMoto] = useState<UsedMoto | undefined>(undefined);
@@ -140,34 +164,48 @@ const UsedModels: React.FC = () => {
 
         <section className="py-12">
           <div className="max-w-6xl mx-auto px-4">
-            {filtered.length === 0 ? (
+            {!hasData ? (
+              <p className="text-center text-gray-600">No hay modelos disponibles en la web, consultar por modelos</p>
+            ) : filtered.length === 0 ? (
               <p className="text-center text-gray-600">No hay usadas que coincidan con tu búsqueda.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-items-center">
-                {filtered.map((moto) => (
-                  <div key={moto.id} className="group bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200 max-w-[320px] md:max-w-[340px] w-full">
-                    <button
-                      type="button"
-                      onClick={() => setModalSrc(moto.image)}
-                      className="w-full aspect-[4/5] bg-white flex items-center justify-center overflow-hidden"
-                    >
-                      <img src={moto.image} alt={moto.name} className="w-full h-full object-contain group-hover:scale-105 transition" />
-                    </button>
-                    <div className="p-4 border-t border-gray-100">
-                      <h3 className="text-base font-bold text-gray-900 leading-snug truncate" title={moto.name}>{moto.name}</h3>
-                      <div className="text-xs text-gray-600 mt-0.5">Año {moto.year} · {moto.km.toLocaleString()} km</div>
-                      <div className="mt-3">
-                        <button
-                          type="button"
-                          onClick={() => confirmAndGo(moto)}
-                          className="inline-flex items-center px-4 py-2 rounded-xl bg-[#f75000] text-white text-sm font-bold hover:bg-[#ff7a33] transition"
-                        >
-                          Consultar
-                        </button>
+                {filtered.map((moto, idx) => {
+                  const displaySrc = getDisplayImage(moto, idx);
+                  return (
+                    <div key={moto.id} className="group bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200 max-w-[320px] md:max-w-[340px] w-full">
+                      <button
+                        type="button"
+                        onClick={() => setModalSrc(displaySrc)}
+                        className="w-full aspect-[4/5] bg-white flex items-center justify-center overflow-hidden"
+                      >
+                        <img
+                          src={displaySrc}
+                          alt={moto.name}
+                          className="w-full h-full object-contain group-hover:scale-105 transition"
+                          onError={(e) => {
+                            const img = e.currentTarget as HTMLImageElement;
+                            img.onerror = null;
+                            img.src = '/logoSinFondo3.webp';
+                          }}
+                        />
+                      </button>
+                      <div className="p-4 border-t border-gray-100">
+                        <h3 className="text-base font-bold text-gray-900 leading-snug truncate" title={moto.name}>{moto.name}</h3>
+                        <div className="text-xs text-gray-600 mt-0.5">Año {moto.year} · {moto.km.toLocaleString()} km</div>
+                        <div className="mt-3">
+                          <button
+                            type="button"
+                            onClick={() => confirmAndGo(moto)}
+                            className="inline-flex items-center px-4 py-2 rounded-xl bg-[#f75000] text-white text-sm font-bold hover:bg-[#ff7a33] transition"
+                          >
+                            Consultar
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
