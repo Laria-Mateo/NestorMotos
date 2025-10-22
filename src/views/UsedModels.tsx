@@ -115,7 +115,7 @@ const UsedModels: React.FC = () => {
     if (formObs) lines.push(`Observaciones: ${formObs}`);
     if (lines.length === 0) lines.push('Consulta general por usadas.');
     mensaje += lines.join('\n');
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`;
+    const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   };
 

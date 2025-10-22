@@ -82,9 +82,10 @@ const Footer: React.FC = () => {
           <a href="https://www.instagram.com/quvos.digitalmarketing/" target="_blank" rel="noopener noreferrer">
             <img src="/logoQuvos.png" alt="Quvos" className="h-7 md:h-8 w-auto object-contain" />
           </a>
-        </div>
-        <div className="mt-1">
-          Dev <a href="https://www.mateolaria.site" target="_blank" rel="noopener noreferrer" className="hover:text-[#ff6600] transition">Mateo Laria</a> · Técnico Universitario en Programación
+          <span className="text-gray-500 text-lg font-bold">×</span>
+          <a href="https://foxsolutions.com.ar" target="_blank" rel="noopener noreferrer">
+            <img src="/logoFoxFooter.png" alt="Fox Software Solutions" className="h-7 md:h-8 w-auto object-contain" />
+          </a>
         </div>
       </div>
     </footer>

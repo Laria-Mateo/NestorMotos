@@ -102,8 +102,8 @@ const ContactForm: React.FC = () => {
     if (observaciones) {
       mensaje += `Observaciones: ${observaciones}`;
     }
-    // Formato correcto para wa.me: https://wa.me/NUMERO?text=MENSAJE
-    const url = `https://wa.me/${phone.replace('+','')}?text=${encodeURIComponent(mensaje)}`;
+    // Formato correcto para WhatsApp API: https://api.whatsapp.com/send?phone=NUMERO&text=MENSAJE
+    const url = `https://api.whatsapp.com/send?phone=${phone.replace('+','')}&text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   };
 
@@ -172,7 +172,7 @@ const ContactForm: React.FC = () => {
       </div>
       {usadas && (
         <div className="-mt-2">
-          <a href="/usadas" className="inline-flex items-center px-4 py-2 rounded-xl border-2 border-[#f75000] text-[#f75000] bg-white hover:bg-[#ff7a33]/10 font-bold text-sm transition">Ver usadas</a>
+          <a href={`/${(typeof window !== 'undefined' ? (window.location.pathname.split('/')[1] || localStorage.getItem('branch') || 'parana') : 'parana')}/usadas`} className="inline-flex items-center px-4 py-2 rounded-xl border-2 border-[#f75000] text-[#f75000] bg-white hover:bg-[#ff7a33]/10 font-bold text-sm transition">Ver usadas</a>
         </div>
       )}
       {/* Sucursal (comentado: sitio exclusivo Venado Tuerto)

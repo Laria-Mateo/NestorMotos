@@ -273,7 +273,7 @@ const Landing: React.FC = () => {
                 </button>
               ))}
               <a
-                href="/usadas"
+                href={`/${branch}/usadas`}
                 className="px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10"
               >
                 ¿Querés consultar por usadas?

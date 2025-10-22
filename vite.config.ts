@@ -11,7 +11,10 @@ export default defineConfig({
       output: {
         manualChunks: undefined
       }
-    }
+    },
+    // Copiar archivos estáticos adicionales
+    copyPublicDir: true
   },
-  base: './'
+  base: './',
+  publicDir: 'public'
 })
