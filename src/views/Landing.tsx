@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -7,12 +7,16 @@ import MotoCarousel from '../components/MotoCarousel';
 import FinancingCard from '../components/FinancingCard';
 import ContactForm from '../components/ContactForm';
 import WhatsAppButton from '../components/WhatsAppButton';
+import FinancingModal from '../components/FinancingModal';
+import TallerModal from '../components/TallerModal';
 // ... otros imports de componentes (SectionTitle, etc.)
 import SectionTitle from '../components/SectionTitle';
 
 // import reviewsData from '../data/googleReviews.json';
 // Siempre usar el dataset de Paraná también para Venado
 import motorbikesParana from '../data/motorbikesParana.json';
+import { ProductService, MULTISITE_CATEGORY_ELECTRICAS } from '../services/productService';
+import { getUsedMotoDisplayImage } from '../utils/usedMotoImage';
 
 // Definir el tipo de moto
 interface Moto {
@@ -47,16 +51,30 @@ const groupMotosByCategory = (motos: Moto[]): MotoCategories => {
 
 const financingOptions = [
   {
-    title: 'Financiación Bancaria',
-    description: 'Accedé a planes de financiación a través de bancos con tasas preferenciales y cuotas fijas.'
+    title: 'Financiación Total al 100%',
+    subtitle: '¡LA MÁS ELEGIDA POR NUESTROS CLIENTES!',
+    items: [
+      'SIN ENTREGA',
+      'SOLO CON DNI'
+    ],
+    option: 1 as const,
+    showCuota: true
   },
   {
-    title: 'Crédito Personal',
-    description: 'Solicitá tu moto con crédito personal, mínimos requisitos y aprobación rápida.'
+    title: 'Financiación Parcial',
+    items: [
+      'CON ENTREGA ECONÓMICA'
+    ],
+    option: 2 as const,
+    showCuota: true
   },
   {
-    title: 'Plan de Ahorro',
-    description: 'Sumate a un plan de ahorro y pagá tu moto en cómodas cuotas mensuales.'
+    title: 'Plan Canje',
+    items: [
+      'TOMAMOS TU USADA COMO PARTE DE PAGO'
+    ],
+    option: 3 as const,
+    showCuota: true
   }
 ];
 
@@ -74,12 +92,33 @@ const Landing: React.FC = () => {
     cc160plus: [],
     quads: [],
   });
-  const [activeTab, setActiveTab] = useState<'cc110' | 'cc125_150' | 'cc160plus' | 'quads'>('cc110');
+  const [electricMotos, setElectricMotos] = useState<Moto[]>([]);
+  const [activeTab, setActiveTab] = useState<'cc110' | 'cc125_150' | 'cc160plus' | 'quads' | 'electricas'>('cc110');
+  const [selectedFinancingOption, setSelectedFinancingOption] = useState<1 | 2 | 3 | null>(null);
+  const [isTallerModalOpen, setIsTallerModalOpen] = useState(false);
 
   useEffect(() => {
     const data = (motorbikesParana as Moto[]);
     setMotoCategories(groupMotosByCategory(data));
   }, [branch]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const products = await ProductService.getProductsByCategoryName(MULTISITE_CATEGORY_ELECTRICAS);
+      if (cancelled) return;
+      setElectricMotos(
+        products.map((u, i) => ({
+          id: u.id,
+          name: u.name,
+          cc: 0,
+          isQuad: false,
+          image: getUsedMotoDisplayImage(u, i),
+        })),
+      );
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Si el usuario cambió de sucursal desde el navbar, no forzar /sucursal
   const branchChanged = (typeof window !== 'undefined' ? sessionStorage.getItem('branchChanged') : null);
@@ -122,24 +161,44 @@ const Landing: React.FC = () => {
     }
   }, [location.search]);
 
-  // Categorías disponibles según sucursal (oculta las vacías)
-  const availableCategories = (
-    [
-      { key: 'cc110' as const, label: '110CC' },
-      { key: 'cc125_150' as const, label: '125/150CC' },
-      { key: 'cc160plus' as const, label: '160CC o más' },
-      { key: 'quads' as const, label: 'Cuatriciclos' },
-    ]
-  ).filter(c => (motoCategories[c.key] || []).length > 0);
+  const availableCategories = useMemo(
+    () =>
+      (
+        [
+          { key: 'cc110' as const, label: '110CC' },
+          { key: 'cc125_150' as const, label: '125/150CC' },
+          { key: 'cc160plus' as const, label: '160CC o más' },
+          { key: 'quads' as const, label: 'Cuatriciclos' },
+        ] as const
+      ).filter((c) => (motoCategories[c.key] || []).length > 0),
+    [motoCategories],
+  );
 
-  // Asegurar activeTab válido
-  useEffect(() => {
-    if (!motoCategories[activeTab] || motoCategories[activeTab].length === 0) {
-      if (availableCategories.length > 0) {
-        setActiveTab(availableCategories[0].key);
-      }
+  const categoryTabs = useMemo(() => {
+    const rows: { key: typeof activeTab; label: string }[] = availableCategories.map((c) => ({
+      key: c.key,
+      label: c.label,
+    }));
+    if (electricMotos.length > 0) {
+      rows.push({ key: 'electricas', label: 'Eléctricas' });
     }
-  }, [motoCategories, activeTab]);
+    return rows;
+  }, [availableCategories, electricMotos.length]);
+
+  useEffect(() => {
+    if (activeTab === 'electricas') {
+      if (electricMotos.length === 0) {
+        const first = availableCategories[0];
+        if (first) setActiveTab(first.key);
+      }
+      return;
+    }
+    const motosInTab = motoCategories[activeTab];
+    if (!motosInTab || motosInTab.length === 0) {
+      if (electricMotos.length > 0) setActiveTab('electricas');
+      else if (availableCategories[0]) setActiveTab(availableCategories[0].key);
+    }
+  }, [motoCategories, activeTab, electricMotos.length, availableCategories]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -224,11 +283,19 @@ const Landing: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
-                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17l3-3 3 3M9 7l3 3 3-3" /></svg>
-                  </span>
-                  <span className="text-lg font-semibold text-black">Contamos con <span className="text-[#ff6600] font-bold">taller propio</span></span>
+                <div className="flex items-center justify-between gap-4 bg-gray-50 rounded-xl shadow p-4">
+                  <div className="flex items-center gap-4">
+                    <span className="bg-[#ff6600]/10 p-3 rounded-full">
+                      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17l3-3 3 3M9 7l3 3 3-3" /></svg>
+                    </span>
+                    <span className="text-lg font-bold text-[#ff6600] uppercase">TALLER PROPIO</span>
+                  </div>
+                  <button
+                    onClick={() => setIsTallerModalOpen(true)}
+                    className="px-4 py-2 bg-[#ff6600] hover:bg-[#ff7a33] text-white font-bold rounded-xl transition"
+                  >
+                    Por turnos
+                  </button>
                 </div>
                 { /*<div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
                   <span className="bg-[#ff6600]/10 p-3 rounded-full">
@@ -259,13 +326,14 @@ const Landing: React.FC = () => {
           </div>
         </section>
         
-        <section id="models" className="py-20 bg-gradient-to-b from-gray-50 via-white to-gray-100 border-b border-gray-200">
+        <section id="models" className="py-20 bg-gradient-to-b from-gray-200 via-gray-300 to-gray-200 border-b border-gray-300">
           <div className="max-w-5xl mx-auto px-4">
-            <SectionTitle>Modelos de Motos</SectionTitle>
+            <SectionTitle>Modelos que trabajamos</SectionTitle>
             <div className="flex flex-wrap justify-center gap-4 mb-10">
-              {availableCategories.map(c => (
+              {categoryTabs.map((c) => (
                 <button
                   key={c.key}
+                  type="button"
                   className={`px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm ${activeTab === c.key ? 'bg-[#ff6600] text-white border-[#ff6600] scale-105' : 'bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10'}`}
                   onClick={() => setActiveTab(c.key)}
                 >
@@ -276,9 +344,10 @@ const Landing: React.FC = () => {
                 href={`/${branch}/usadas`}
                 className="px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10"
               >
-                ¿Querés consultar por usadas?
+                Usadas
               </a>
             </div>
+            {activeTab === 'electricas' && <MotoCarousel motos={electricMotos} detailHref="usadas" />}
             {activeTab === 'cc110' && <MotoCarousel motos={motoCategories.cc110} />}
             {activeTab === 'cc125_150' && <MotoCarousel motos={motoCategories.cc125_150} />}
             {activeTab === 'cc160plus' && <MotoCarousel motos={motoCategories.cc160plus} />}
@@ -297,12 +366,41 @@ const Landing: React.FC = () => {
         
         <section id="financing" className="py-20 bg-black border-b border-gray-900">
           <div className="max-w-5xl mx-auto px-4">
-            <SectionTitle className="text-white">Tipos de Financiaciones</SectionTitle>
+            <SectionTitle className="text-white">Métodos de Pago</SectionTitle>
             <div className="flex flex-col md:flex-row gap-6 justify-center items-stretch md:items-stretch">
               {financingOptions.map((option, idx) => (
-                <FinancingCard key={idx} title={option.title} description={option.description} />
+                <FinancingCard 
+                  key={idx} 
+                  title={option.title}
+                  subtitle={option.subtitle}
+                  items={option.items}
+                  showCuota={option.showCuota}
+                  onConsultar={() => option.option && setSelectedFinancingOption(option.option)}
+                />
               ))}
             </div>
+            <div className="mt-8 text-center">
+              <p className="text-white font-bold text-lg uppercase mb-4 tracking-wide">Para consultas personalizadas o contado</p>
+              <a
+                href="#contact"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="inline-block px-8 py-3 bg-white hover:bg-gray-100 text-black font-bold rounded-xl transition shadow-lg"
+              >
+                Consultar
+              </a>
+            </div>
+            <FinancingModal
+              isOpen={selectedFinancingOption !== null}
+              onClose={() => setSelectedFinancingOption(null)}
+              option={selectedFinancingOption || 1}
+            />
+            <TallerModal
+              isOpen={isTallerModalOpen}
+              onClose={() => setIsTallerModalOpen(false)}
+            />
           </div>
         </section>
         
@@ -327,7 +425,7 @@ const Landing: React.FC = () => {
           <div className="absolute inset-0 hero-grid z-10" />
           <div className="absolute inset-0 hero-overlay-vignette z-10" />
           <div className="relative z-20 max-w-6xl mx-auto px-4">
-            <SectionTitle className="text-white">Algunos de ustedes</SectionTitle>
+            <SectionTitle className="text-white">Clientes felices</SectionTitle>
             <ClientsMarquee />
             <p className="mt-6 text-center text-sm text-white/80">Fotos en sucursal Paraná.</p>
           </div>

@@ -84,11 +84,7 @@ const ModelDetail: React.FC = () => {
                 <img src={moto.image} alt={moto.name} className="w-full h-[420px] object-contain" />
               </div>
               <div className="p-6">
-                <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2">{moto.name}</h1>
-                <div className="flex items-center gap-3 text-primary mb-4">
-                  <span className="font-semibold">{moto.cc}cc</span>
-                  {moto.isQuad && <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">CUATRICICLO</span>}
-                </div>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-4">{moto.name}</h1>
 
                 {moto.colors && moto.colors.length > 0 && (
                   <div className="mb-6">
@@ -105,8 +101,6 @@ const ModelDetail: React.FC = () => {
                   <h2 className="text-lg font-bold text-gray-900">Ficha técnica</h2>
                   <ul className="text-sm text-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-y-2">
                     <li>Marca: <span className="font-semibold">{moto.name.split(' ')[0]}</span></li>
-                    <li>Modelo: <span className="font-semibold">{moto.name}</span></li>
-                    <li>Cilindrada: <span className="font-semibold">{moto.cc} cc</span></li>
                     <li>Tipo: <span className="font-semibold">{moto.isQuad ? 'Cuatriciclo' : 'Moto'}</span></li>
                   </ul>
                 </div>

@@ -69,7 +69,7 @@ const Footer: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75h.008v.008h-.008z" />
                 </svg>
-                <span><a href="https://www.instagram.com/nestormotos2/" target="_blank" rel="noopener noreferrer" className="hover:text-[#ff6600] transition">@nestormotos2</a></span>
+                <span><a href="https://www.instagram.com/nestormotosparana/" target="_blank" rel="noopener noreferrer" className="hover:text-[#ff6600] transition">@nestormotosparana</a></span>
               </li>
             </ul>
           </div>

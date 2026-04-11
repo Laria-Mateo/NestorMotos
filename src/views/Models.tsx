@@ -4,6 +4,8 @@ import Footer from '../components/Footer';
 import SectionTitle from '../components/SectionTitle';
 import motorbikesParana from '../data/motorbikesParana.json';
 import { Link, useSearchParams } from 'react-router-dom';
+import { ProductService } from '../services/productService';
+import { getUsedMotoDisplayImage } from '../utils/usedMotoImage';
 
 type Moto = {
   id: string;
@@ -14,43 +16,76 @@ type Moto = {
   colors?: string[];
 };
 
-// Opciones de cilindrada dinámicas en base a modelos disponibles
+type CatalogEntry = Moto & { kind: 'catalog' };
+
+type MultisiteEntry = {
+  kind: 'multisite';
+  id: string;
+  name: string;
+  cc: number;
+  isQuad: false;
+  image: string;
+  categoryLabel?: string;
+};
 
 const Models: React.FC = () => {
-  // Al entrar a la página, subir al inicio
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, []);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  // const branchPath = (typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : '') as 'parana' | 'venado';
-  // Usar el dataset de Paraná para todas las sucursales
-  const data = (motorbikesParana as Moto[]);
+  const catalogEntries = useMemo<CatalogEntry[]>(
+    () => (motorbikesParana as Moto[]).map((m) => ({ ...m, kind: 'catalog' as const })),
+    [],
+  );
+  const [multisiteEntries, setMultisiteEntries] = useState<MultisiteEntry[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const products = await ProductService.getProductsExcludingUsadas();
+      if (cancelled) return;
+      setMultisiteEntries(
+        products.map((u, i) => ({
+          kind: 'multisite' as const,
+          id: u.id,
+          name: u.name,
+          cc: 0,
+          isQuad: false,
+          image: getUsedMotoDisplayImage(u, i),
+          categoryLabel: u.categoryName?.trim() || undefined,
+        })),
+      );
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const combined = useMemo(() => [...catalogEntries, ...multisiteEntries], [catalogEntries, multisiteEntries]);
+
   const [query, setQuery] = useState<string>(searchParams.get('q') || '');
   const [cc, setCc] = useState<string>(searchParams.get('cc') || '');
   const [onlyQuads, setOnlyQuads] = useState<boolean>(searchParams.get('quads') === '1');
 
   const ccOptions = useMemo(() => {
-    const all = data.map(m => m.cc)
-    const unique = Array.from(new Set(all)).sort((a, b) => a - b)
-    return unique
-  }, [])
+    const all = combined.map((m) => m.cc);
+    return Array.from(new Set(all)).sort((a, b) => a - b);
+  }, [combined]);
 
   const filtered = useMemo(() => {
-    let list = data.slice();
+    let list = combined.slice();
     if (query.trim()) {
       const q = query.trim().toLowerCase();
-      list = list.filter(m => m.name.toLowerCase().includes(q));
+      list = list.filter((m) => m.name.toLowerCase().includes(q));
     }
     if (cc) {
       const ccNum = Number(cc);
-      list = list.filter(m => m.cc === ccNum);
+      list = list.filter((m) => m.cc === ccNum);
     }
     if (onlyQuads) {
-      list = list.filter(m => m.isQuad);
+      list = list.filter((m) => m.isQuad);
     }
     return list;
-  }, [query, cc, onlyQuads, data]);
+  }, [query, cc, onlyQuads, combined]);
 
   const updateParams = (next: Partial<{ q: string; cc: string; quads: string }>) => {
     const newParams = new URLSearchParams(searchParams);
@@ -98,7 +133,7 @@ const Models: React.FC = () => {
                 >
                   <option value="">Todas</option>
                   {ccOptions.map((opt) => (
-                    <option key={opt} value={opt}>{opt}cc</option>
+                    <option key={opt} value={opt}>{opt === 0 ? 'Eléctrica / sin cilindrada' : `${opt}cc`}</option>
                   ))}
                 </select>
               </div>
@@ -126,16 +161,30 @@ const Models: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-items-center">
                 {filtered.map((moto) => (
                   <Link
-                    to={`${moto.id}`}
-                    key={moto.id}
+                    to={moto.kind === 'multisite' ? `../usadas/${moto.id}` : moto.id}
+                    key={`${moto.kind}-${moto.id}`}
                     className="group bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200 max-w-[320px] md:max-w-[340px] w-full"
                   >
                     <div className="aspect-[4/5] bg-white flex items-center justify-center overflow-hidden">
-                      <img src={moto.image} alt={moto.name} className="w-full h-full object-contain group-hover:scale-105 transition" />
+                      <img
+                        src={moto.image}
+                        alt={moto.name}
+                        className="w-full h-full object-contain group-hover:scale-105 transition"
+                        onError={(e) => {
+                          const img = e.currentTarget as HTMLImageElement;
+                          img.onerror = null;
+                          img.src = '/logoSinFondo3.webp';
+                        }}
+                      />
                     </div>
                     <div className="p-4 border-t border-gray-100">
                       <h3 className="text-base font-bold text-gray-900 leading-snug truncate" title={moto.name}>{moto.name}</h3>
-                      <div className="text-xs text-gray-600 mt-0.5">{moto.cc}cc {moto.isQuad ? '· Cuatriciclo' : ''}</div>
+                      {moto.kind === 'multisite' && moto.categoryLabel && (
+                        <div className="text-xs text-gray-600 mt-0.5">{moto.categoryLabel}</div>
+                      )}
+                      {moto.kind === 'catalog' && moto.isQuad && (
+                        <div className="text-xs text-gray-600 mt-0.5">Cuatriciclo</div>
+                      )}
                     </div>
                   </Link>
                 ))}
@@ -150,5 +199,3 @@ const Models: React.FC = () => {
 };
 
 export default Models;
-
-

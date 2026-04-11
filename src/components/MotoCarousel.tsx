@@ -14,6 +14,7 @@ type Moto = {
 
 type MotoCarouselProps = {
   motos: Moto[]
+  detailHref?: "modelos" | "usadas"
 }
 
 const ArrowLeft = () => (
@@ -30,11 +31,11 @@ const ArrowRight = () => (
 
 //
 
-const ZapIcon = () => (
-  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-  </svg>
-)
+// const ZapIcon = () => (
+//   <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+//     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+//   </svg>
+// )
 
 const CloseIcon = () => (
   <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,7 +45,7 @@ const CloseIcon = () => (
 
 // Título limpiado (no usado actualmente)
 
-const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
+const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, detailHref = "modelos" }) => {
   const [current, setCurrent] = useState(0)
   const [showModal, setShowModal] = useState(false)
   const [modalMoto, setModalMoto] = useState<Moto | null>(null)
@@ -196,35 +197,59 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
   }
 
   // Modal de detalles
-  const Modal = ({ moto, onClose }: { moto: Moto; onClose: () => void }) => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm">
-      <div className="relative max-w-6xl max-h-[90vh] mx-4">
-        <div className="relative bg-white rounded-2xl overflow-hidden shadow-2xl">
+  const detailPathSegment = detailHref === "usadas" ? "usadas" : "modelos"
 
-          {/* Header del modal */}
-          <div className="relative z-10 p-6 bg-white border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-1">{moto.name}</h3>
-                <div className="flex items-center gap-2 text-orange-500">
-                  <ZapIcon />
-                  <span className="text-sm font-medium">{moto.cc}cc</span>
-                  {moto.isQuad && <span className="text-xs bg-orange-500 text-white px-2 py-1 rounded-full">QUAD</span>}
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={onClose}
-                  className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-all duration-200"
-                >
-                  <CloseIcon />
-                </button>
-              </div>
+  const Modal = ({ moto, onClose }: { moto: Moto; onClose: () => void }) => {
+    const isClosingRef = useRef(false);
+
+    const handleBackdropClick = (e: React.MouseEvent) => {
+      if (e.target === e.currentTarget && !isClosingRef.current) {
+        isClosingRef.current = true;
+        onClose();
+      }
+    };
+
+    const handleClose = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!isClosingRef.current) {
+        isClosingRef.current = true;
+        onClose();
+      }
+    };
+
+    return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+      onClick={handleBackdropClick}
+    >
+      <div 
+        className="relative max-w-6xl w-full max-h-[90vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-full">
+
+          {/* Header con botón cerrar y colores */}
+          <div className="relative z-10 p-4 md:p-6 bg-white border-b border-gray-200 flex-shrink-0">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex-1"></div>
+              <button
+                onClick={handleClose}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 relative"
+                type="button"
+                aria-label="Cerrar"
+              >
+                <CloseIcon />
+              </button>
             </div>
 
             {/* Colores en el modal si existen */}
             {(moto as any).colors && (moto as any).colors.length > 0 && (
-              <div className="mt-4 flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-700">Colores disponibles:</span>
                 <div className="flex gap-2">
                   {(moto as any).colors.map((color: string, idx: number) => (
@@ -240,32 +265,36 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
             )}
           </div>
 
-          {/* Imagen del modal */}
-          <div className="relative p-8 bg-white">
-            <img
-              src={moto.image || "/placeholder.svg"}
-              alt={moto.name}
-              className="w-full max-h-[60vh] object-contain mx-auto drop-shadow-2xl"
-              draggable="false"
-            />
-            {/* Marca de agua removida */}
+          {/* Contenedor scrolleable */}
+          <div className="overflow-y-auto flex-1">
+
+            {/* Imagen del modal */}
+            <div className="relative p-4 md:p-8 bg-white">
+              <img
+                src={moto.image || "/placeholder.svg"}
+                alt={moto.name}
+                className="w-full max-h-[50vh] md:max-h-[60vh] object-contain mx-auto drop-shadow-2xl"
+                draggable="false"
+              />
+              {/* Marca de agua removida */}
+            </div>
           </div>
 
-          {/* Botón Más info debajo de la imagen */}
-          <div className="px-8 pb-8 bg-white">
+          {/* Botón Más info fijo en la parte inferior */}
+          <div className="px-4 md:px-8 py-4 md:py-6 bg-white border-t border-gray-200 flex-shrink-0">
             <a
-              href={`../modelos/${moto.id}`}
+              href={`../${detailPathSegment}/${moto.id}`}
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 const branch = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : 'parana';
-                window.location.assign(`/${branch}/modelos/${moto.id}`);
+                window.location.assign(`/${branch}/${detailPathSegment}/${moto.id}`);
               }}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 const branch = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : 'parana';
-                window.location.assign(`/${branch}/modelos/${moto.id}`);
+                window.location.assign(`/${branch}/${detailPathSegment}/${moto.id}`);
               }}
               className="mx-auto block w-full max-w-xs text-center bg-[#f75000] text-white font-semibold px-6 py-3 rounded-full shadow-sm hover:bg-[#ff7a33] active:bg-[#cc3f00] focus:outline-none focus:ring-2 focus:ring-[#f75000]/40 text-base select-none"
             >
@@ -275,7 +304,8 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
         </div>
       </div>
     </div>
-  )
+    );
+  }
 
   if (length === 0) return null
 

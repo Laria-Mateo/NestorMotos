@@ -1,24 +1,27 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SectionTitle from '../components/SectionTitle';
-import usedData from '../data/usedMotorbikes.json';
+import {
+  ProductService,
+  MULTISITE_CATEGORY_USADAS,
+  formatUsedMotoMeta,
+  resolveUsedMotoWhatsappText,
+  type UsedMoto,
+} from '../services/productService';
 import ConfirmModal from '../components/ConfirmModal';
-
-type UsedMoto = {
-  id: string;
-  name: string;
-  year: number;
-  km: number;
-  image: string;
-};
+import { getUsedMotoDisplayImage } from '../utils/usedMotoImage';
 
 const UsedModels: React.FC = () => {
+  const { branch } = useParams<{ branch: string }>();
+  const branchPath = branch || (typeof window !== 'undefined' ? localStorage.getItem('branch') || 'parana' : 'parana');
+
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'auto' }); }, []);
 
   const [query, setQuery] = useState('');
   const [year, setYear] = useState('');
-  const [modalSrc, setModalSrc] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState('');
   const [formModelo, setFormModelo] = useState('');
   const [formAnio, setFormAnio] = useState('');
   const [formKm, setFormKm] = useState('');
@@ -26,63 +29,79 @@ const UsedModels: React.FC = () => {
   const [tModelo, setTModelo] = useState(false);
   const [tAnio, setTAnio] = useState(false);
   const [tKm, setTKm] = useState(false);
+  const [list, setList] = useState<UsedMoto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const years = useMemo(() => {
-    const ys = (usedData as UsedMoto[]).map(m => m.year);
-    return Array.from(new Set(ys)).sort((a, b) => b - a);
+  useEffect(() => {
+    const loadProducts = async () => {
+      setIsLoading(true);
+      try {
+        const products = await ProductService.getProductsByCategoryName(MULTISITE_CATEGORY_USADAS);
+        setList(products);
+      } catch (error) {
+        console.error('Error al cargar productos:', error);
+        setList([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadProducts();
   }, []);
 
-  const list = usedData as UsedMoto[];
+  const years = useMemo(() => {
+    const ys = list.map((m) => m.year).filter((y): y is number => y != null && Number.isFinite(y));
+    return Array.from(new Set(ys)).sort((a, b) => b - a);
+  }, [list]);
+
+  const categories = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const m of list) {
+      const cid = m.categoryId;
+      if (cid == null || !Number.isFinite(cid)) continue;
+      if (!map.has(cid)) {
+        const label = (m.categoryName || '').trim() || `Categoría ${cid}`;
+        map.set(cid, label);
+      }
+    }
+    return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1], 'es'));
+  }, [list]);
+
   const hasData = list.length > 0;
   const filtered = useMemo(() => {
     let arr = list.slice();
     const q = query.trim().toLowerCase();
     if (q) arr = arr.filter(m => m.name.toLowerCase().includes(q));
-    if (year) arr = arr.filter(m => String(m.year) === year);
+    if (year) arr = arr.filter((m) => m.year != null && String(m.year) === year);
+    if (categoryId) {
+      const cid = Number(categoryId);
+      arr = arr.filter((m) => m.categoryId != null && m.categoryId === cid);
+    }
     return arr;
-  }, [list, query, year]);
-
-  const toUsedImagePath = (src: string): string => {
-    if (!src) return '/logoSinFondo3.webp';
-    if (src.startsWith('/motorbikes/used/')) return src;
-    const file = src.split('/').pop() || src;
-    return `/motorbikes/used/${file}`;
-  };
-
-  // Imágenes disponibles en public/motorbikes/used
-  const usedGallery = useMemo(() => ([
-    '/motorbikes/used/USADA1.webp',
-    '/motorbikes/used/USADA2.webp',
-    '/motorbikes/used/USADA3.webp',
-    '/motorbikes/used/USADA4.webp',
-    '/motorbikes/used/USADA 5.webp',
-  ]), []);
-
-  const getDisplayImage = (moto: UsedMoto, index: number): string => {
-    const candidate = toUsedImagePath(moto.image);
-    // Si ya es una de las USADA*.webp o ruta en used, úsala; sino, asignar una de la galería
-    if (candidate.startsWith('/motorbikes/used/')) return candidate;
-    return usedGallery[index % usedGallery.length];
-  };
+  }, [list, query, year, categoryId]);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingMoto, setPendingMoto] = useState<UsedMoto | undefined>(undefined);
-  const confirmAndGo = (m?: UsedMoto) => {
-    setPendingMoto(m);
+  const confirmAndGo = () => {
     setConfirmOpen(true);
   };
   const handleConfirm = () => {
     setConfirmOpen(false);
-    const m = pendingMoto;
     try {
       sessionStorage.removeItem('usedModel');
       sessionStorage.removeItem('usedYear');
       sessionStorage.removeItem('usedKm');
     } catch {}
     const currentBranch = (typeof window !== 'undefined' ? (window.location.pathname.split('/')[1] || localStorage.getItem('branch') || 'parana') : 'parana');
-    const base = `/${currentBranch}?used=1`;
-    const params = m ? `&usedModel=${encodeURIComponent(m.name)}&usedYear=${m.year}&usedKm=${m.km}` : '';
-    window.location.href = `${base}${params}#contact`;
+    window.location.href = `/${currentBranch}?used=1#contact`;
+  };
+
+  const openUsedWhatsapp = (moto: UsedMoto) => {
+    const br = typeof window !== 'undefined' ? localStorage.getItem('branch') || 'parana' : 'parana';
+    const WHATSAPP_PARANA = '5493433007984';
+    const WHATSAPP_VENADO = '5493462252244';
+    const phone = br === 'parana' ? WHATSAPP_PARANA : WHATSAPP_VENADO;
+    const text = resolveUsedMotoWhatsappText(moto);
+    const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
   };
 
   const canSubmit = useMemo(() => {
@@ -135,8 +154,8 @@ const UsedModels: React.FC = () => {
                 Cotizá tu usada sin costo
               </button>
             </div>
-            <div className="flex flex-col md:flex-row gap-4 md:items-end">
-              <div className="flex-1">
+            <div className="flex flex-col md:flex-row flex-wrap gap-4 md:items-end">
+              <div className="flex-1 min-w-[200px]">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
                 <input
                   value={query}
@@ -145,12 +164,25 @@ const UsedModels: React.FC = () => {
                   className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
-              <div>
+              <div className="min-w-[160px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                <select
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                  className="w-full md:w-auto bg-white border border-gray-300 rounded-lg px-4 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Todas</option>
+                  {categories.map(([id, label]) => (
+                    <option key={id} value={String(id)}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="min-w-[120px]">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Año</label>
                 <select
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
-                  className="bg-white border border-gray-300 rounded-lg px-4 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full md:w-auto bg-white border border-gray-300 rounded-lg px-4 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Todos</option>
                   {years.map((y) => (
@@ -164,44 +196,47 @@ const UsedModels: React.FC = () => {
 
         <section className="py-12">
           <div className="max-w-6xl mx-auto px-4">
-            {!hasData ? (
+            {isLoading ? (
+              <p className="text-center text-gray-600">Cargando motos usadas...</p>
+            ) : !hasData ? (
               <p className="text-center text-gray-600">No hay modelos disponibles en la web, consultar por modelos</p>
             ) : filtered.length === 0 ? (
               <p className="text-center text-gray-600">No hay usadas que coincidan con tu búsqueda.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-items-center">
                 {filtered.map((moto, idx) => {
-                  const displaySrc = getDisplayImage(moto, idx);
+                  const displaySrc = getUsedMotoDisplayImage(moto, idx);
                   return (
-                    <div key={moto.id} className="group bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200 max-w-[320px] md:max-w-[340px] w-full">
-                      <button
-                        type="button"
-                        onClick={() => setModalSrc(displaySrc)}
-                        className="w-full aspect-[4/5] bg-white flex items-center justify-center overflow-hidden"
+                    <div key={moto.id} className="group bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200 max-w-[320px] md:max-w-[340px] w-full flex flex-col">
+                      <Link
+                        to={`/${branchPath}/usadas/${moto.id}`}
+                        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-t-xl"
                       >
-                        <img
-                          src={displaySrc}
-                          alt={moto.name}
-                          className="w-full h-full object-contain group-hover:scale-105 transition"
-                          onError={(e) => {
-                            const img = e.currentTarget as HTMLImageElement;
-                            img.onerror = null;
-                            img.src = '/logoSinFondo3.webp';
-                          }}
-                        />
-                      </button>
-                      <div className="p-4 border-t border-gray-100">
-                        <h3 className="text-base font-bold text-gray-900 leading-snug truncate" title={moto.name}>{moto.name}</h3>
-                        <div className="text-xs text-gray-600 mt-0.5">Año {moto.year} · {moto.km.toLocaleString()} km</div>
-                        <div className="mt-3">
-                          <button
-                            type="button"
-                            onClick={() => confirmAndGo(moto)}
-                            className="inline-flex items-center px-4 py-2 rounded-xl bg-[#f75000] text-white text-sm font-bold hover:bg-[#ff7a33] transition"
-                          >
-                            Consultar
-                          </button>
+                        <div className="aspect-[4/5] bg-white flex items-center justify-center overflow-hidden">
+                          <img
+                            src={displaySrc}
+                            alt={moto.name}
+                            className="w-full h-full object-contain group-hover:scale-105 transition"
+                            onError={(e) => {
+                              const img = e.currentTarget as HTMLImageElement;
+                              img.onerror = null;
+                              img.src = '/logoSinFondo3.webp';
+                            }}
+                          />
                         </div>
+                        <div className="p-4 border-t border-gray-100">
+                          <h3 className="text-base font-bold text-gray-900 leading-snug truncate" title={moto.name}>{moto.name}</h3>
+                          <div className="text-xs text-gray-600 mt-0.5">{formatUsedMotoMeta(moto)}</div>
+                        </div>
+                      </Link>
+                      <div className="px-4 pb-4 pt-0">
+                        <button
+                          type="button"
+                          onClick={() => openUsedWhatsapp(moto)}
+                          className="inline-flex items-center px-4 py-2 rounded-xl bg-[#f75000] text-white text-sm font-bold hover:bg-[#ff7a33] transition w-full justify-center sm:w-auto"
+                        >
+                          Consultar
+                        </button>
                       </div>
                     </div>
                   );
@@ -222,12 +257,6 @@ const UsedModels: React.FC = () => {
             </button>
           </div>
         </section>
-
-        {modalSrc && (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setModalSrc(null)}>
-            <img src={modalSrc} alt="Usada" className="max-w-full max-h-[90vh] object-contain" />
-          </div>
-        )}
 
         <section id="used-form" className="py-10 bg-white border-t border-gray-200">
           <div className="max-w-3xl mx-auto px-4">
@@ -301,7 +330,7 @@ const UsedModels: React.FC = () => {
       <ConfirmModal
         open={confirmOpen}
         message="¿Querés ir al formulario para consultar por esta usada?"
-        subtitle={pendingMoto ? pendingMoto.name : undefined}
+        subtitle={undefined}
         confirmLabel="Sí, ir"
         cancelLabel="Cancelar"
         onConfirm={handleConfirm}
