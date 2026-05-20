@@ -5,15 +5,18 @@ import Footer from '../components/Footer';
 import {
   ProductService,
   formatUsedMotoMeta,
+  isUsedListingCategory,
+  matchesUsedCategoryForBranch,
   resolveUsedMotoWhatsappText,
   type UsedMoto,
 } from '../services/productService';
 import { getUsedMotoDisplayImage } from '../utils/usedMotoImage';
+import { resolveBranchSlug } from '../utils/branch';
 
 const UsedModelDetail: React.FC = () => {
   const { id, branch } = useParams<{ id: string; branch: string }>();
   const navigate = useNavigate();
-  const b = branch || (typeof window !== 'undefined' ? localStorage.getItem('branch') || 'parana' : 'parana');
+  const branchSlug = resolveBranchSlug(branch);
 
   const [moto, setMoto] = useState<UsedMoto | null | undefined>(undefined);
 
@@ -29,20 +32,28 @@ const UsedModelDetail: React.FC = () => {
         return;
       }
       const found = await ProductService.getProductById(id);
-      if (!cancelled) setMoto(found ?? null);
+      if (cancelled) return;
+      if (!found) {
+        setMoto(null);
+        return;
+      }
+      if (isUsedListingCategory(found.categoryName) && !matchesUsedCategoryForBranch(found.categoryName, branchSlug)) {
+        setMoto(null);
+        return;
+      }
+      setMoto(found);
     };
     run();
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, branchSlug]);
 
   const displaySrc = moto ? getUsedMotoDisplayImage(moto, 0) : '';
 
   const openConsult = () => {
     if (!moto) return;
-    const br = typeof window !== 'undefined' ? localStorage.getItem('branch') || 'parana' : 'parana';
     const WHATSAPP_PARANA = '5493433007984';
     const WHATSAPP_VENADO = '5493462252244';
-    const phone = br === 'parana' ? WHATSAPP_PARANA : WHATSAPP_VENADO;
+    const phone = branchSlug === 'parana' ? WHATSAPP_PARANA : WHATSAPP_VENADO;
     const text = resolveUsedMotoWhatsappText(moto);
     const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -67,7 +78,7 @@ const UsedModelDetail: React.FC = () => {
         <main className="flex-1 grid place-items-center">
           <div className="text-center p-8">
             <p className="text-gray-700 mb-4">Moto no encontrada.</p>
-            <Link to={`/${b}/usadas`} className="text-primary font-bold">Volver a usadas</Link>
+            <Link to={`/${branchSlug}/usadas`} className="text-primary font-bold">Volver a usadas</Link>
           </div>
         </main>
         <Footer />

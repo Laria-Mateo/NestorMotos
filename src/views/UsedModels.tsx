@@ -5,17 +5,17 @@ import Footer from '../components/Footer';
 import SectionTitle from '../components/SectionTitle';
 import {
   ProductService,
-  MULTISITE_CATEGORY_USADAS,
   formatUsedMotoMeta,
   resolveUsedMotoWhatsappText,
   type UsedMoto,
 } from '../services/productService';
 import ConfirmModal from '../components/ConfirmModal';
 import { getUsedMotoDisplayImage } from '../utils/usedMotoImage';
+import { resolveBranchSlug } from '../utils/branch';
 
 const UsedModels: React.FC = () => {
   const { branch } = useParams<{ branch: string }>();
-  const branchPath = branch || (typeof window !== 'undefined' ? localStorage.getItem('branch') || 'parana' : 'parana');
+  const branchSlug = resolveBranchSlug(branch);
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'auto' }); }, []);
 
@@ -33,20 +33,23 @@ const UsedModels: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     const loadProducts = async () => {
       setIsLoading(true);
+      setList([]);
+      setCategoryId('');
       try {
-        const products = await ProductService.getProductsByCategoryName(MULTISITE_CATEGORY_USADAS);
-        setList(products);
-      } catch (error) {
-        console.error('Error al cargar productos:', error);
-        setList([]);
+        const products = await ProductService.getUsedProductsForBranch(branchSlug);
+        if (!cancelled) setList(products);
+      } catch {
+        if (!cancelled) setList([]);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
     loadProducts();
-  }, []);
+    return () => { cancelled = true; };
+  }, [branchSlug]);
 
   const years = useMemo(() => {
     const ys = list.map((m) => m.year).filter((y): y is number => y != null && Number.isFinite(y));
@@ -90,15 +93,13 @@ const UsedModels: React.FC = () => {
       sessionStorage.removeItem('usedYear');
       sessionStorage.removeItem('usedKm');
     } catch {}
-    const currentBranch = (typeof window !== 'undefined' ? (window.location.pathname.split('/')[1] || localStorage.getItem('branch') || 'parana') : 'parana');
-    window.location.href = `/${currentBranch}?used=1#contact`;
+    window.location.href = `/${branchSlug}?used=1#contact`;
   };
 
   const openUsedWhatsapp = (moto: UsedMoto) => {
-    const br = typeof window !== 'undefined' ? localStorage.getItem('branch') || 'parana' : 'parana';
     const WHATSAPP_PARANA = '5493433007984';
     const WHATSAPP_VENADO = '5493462252244';
-    const phone = br === 'parana' ? WHATSAPP_PARANA : WHATSAPP_VENADO;
+    const phone = branchSlug === 'parana' ? WHATSAPP_PARANA : WHATSAPP_VENADO;
     const text = resolveUsedMotoWhatsappText(moto);
     const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -209,7 +210,7 @@ const UsedModels: React.FC = () => {
                   return (
                     <div key={moto.id} className="group bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200 max-w-[320px] md:max-w-[340px] w-full flex flex-col">
                       <Link
-                        to={`/${branchPath}/usadas/${moto.id}`}
+                        to={`/${branchSlug}/usadas/${moto.id}`}
                         className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-t-xl"
                       >
                         <div className="aspect-[4/5] bg-white flex items-center justify-center overflow-hidden">

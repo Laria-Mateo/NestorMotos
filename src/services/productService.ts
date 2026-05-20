@@ -1,5 +1,6 @@
 import { multisiteAssetsOrigin, multisiteProductsUrl } from '../config/multisite';
 import { unwrapProductsList } from '../config/multisitePayload';
+import { resolveBranchSlug } from '../utils/branch';
 
 export type UsedMoto = {
   id: string;
@@ -107,6 +108,34 @@ export function resolveUsedMotoWhatsappText(m: Pick<UsedMoto, 'name' | 'whatsapp
 
 export const MULTISITE_CATEGORY_ELECTRICAS = 'Electricas';
 export const MULTISITE_CATEGORY_USADAS = 'Usadas';
+export const MULTISITE_CATEGORY_VENADO_USADAS = 'venado/Usadas';
+
+const USADAS_LISTING_CATEGORIES = new Set(
+  [MULTISITE_CATEGORY_USADAS, MULTISITE_CATEGORY_VENADO_USADAS].map((c) => c.toLowerCase()),
+);
+
+export function usedCategoryNameForBranch(branch: string): string {
+  return resolveBranchSlug(branch) === 'venado'
+    ? MULTISITE_CATEGORY_VENADO_USADAS
+    : MULTISITE_CATEGORY_USADAS;
+}
+
+export function isUsedListingCategory(categoryName: string | undefined): boolean {
+  const c = (categoryName || '').trim().toLowerCase();
+  return USADAS_LISTING_CATEGORIES.has(c);
+}
+
+export function matchesUsedCategoryForBranch(
+  categoryName: string | undefined,
+  branch: string,
+): boolean {
+  const c = (categoryName || '').trim().toLowerCase();
+  const slug = resolveBranchSlug(branch);
+  if (slug === 'venado') {
+    return c === MULTISITE_CATEGORY_VENADO_USADAS.toLowerCase();
+  }
+  return c === MULTISITE_CATEGORY_USADAS.toLowerCase();
+}
 
 export class ProductService {
   static async getProductsByCategoryName(categoryName: string): Promise<UsedMoto[]> {
@@ -116,10 +145,15 @@ export class ProductService {
     return list.filter((p) => (p.categoryName || '').trim().toLowerCase() === target);
   }
 
+  static async getUsedProductsForBranch(branch: string): Promise<UsedMoto[]> {
+    const slug = resolveBranchSlug(branch);
+    const list = await this.getProducts();
+    return list.filter((p) => matchesUsedCategoryForBranch(p.categoryName, slug));
+  }
+
   static async getProductsExcludingUsadas(): Promise<UsedMoto[]> {
     const list = await this.getProducts();
-    const ex = MULTISITE_CATEGORY_USADAS.trim().toLowerCase();
-    return list.filter((p) => (p.categoryName || '').trim().toLowerCase() !== ex);
+    return list.filter((p) => !isUsedListingCategory(p.categoryName));
   }
 
   static async getProducts(): Promise<UsedMoto[]> {

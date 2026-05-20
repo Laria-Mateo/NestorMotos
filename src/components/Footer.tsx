@@ -75,8 +75,8 @@ const Footer: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="w-full bg-white text-black text-center py-2 text-xs font-semibold mt-8">
-        <div className="mb-2">© 2025 Nestor Motos</div>
+      <div className="w-full bg-black text-white text-center py-2 text-xs font-semibold mt-8">
+        <div className="mb-2">© 2026 Nestor Motos</div>
         <div className="flex items-center justify-center gap-3">
           <span>Desarrollado por:</span>
           <a href="https://www.instagram.com/quvos.digitalmarketing/" target="_blank" rel="noopener noreferrer">
@@ -84,7 +84,7 @@ const Footer: React.FC = () => {
           </a>
           <span className="text-gray-500 text-lg font-bold">×</span>
           <a href="https://foxsolutions.com.ar" target="_blank" rel="noopener noreferrer">
-            <img src="/logoFoxFooter.png" alt="Fox Software Solutions" className="h-7 md:h-8 w-auto object-contain" />
+            <img src="/logoFoxFooter.png" alt="Fox Software Solutions" className="h-7 md:h-14 object-contain" />
           </a>
         </div>
       </div>
