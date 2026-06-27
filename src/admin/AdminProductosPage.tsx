@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   adminCreateProducto,
   adminDeleteProducto,
@@ -8,36 +8,24 @@ import {
 } from '../api/adminApi';
 import type { Producto } from '../api/types';
 import {
-  PRODUCT_CATEGORY_ELECTRICAS,
-  PRODUCT_CATEGORY_USADAS,
-  PRODUCT_CATEGORY_VENADO_USADAS,
+  DEFAULT_PRODUCT_CATEGORY,
+  PRODUCT_CATEGORY_PRESETS,
 } from '../constants/categories';
 import { mediaUrl } from '../utils/mediaUrl';
 import { ApiError } from '../api/client';
-import { useAdminBranch } from '../auth/AdminBranchContext';
-
-const PARANA_PRESETS = [
-  PRODUCT_CATEGORY_USADAS,
-  PRODUCT_CATEGORY_VENADO_USADAS,
-  PRODUCT_CATEGORY_ELECTRICAS,
-  'Merchandising',
-];
-
-const VENADO_PRESETS = [PRODUCT_CATEGORY_VENADO_USADAS];
 
 const AdminProductosPage: React.FC = () => {
-  const { isParanaScope, isVenadoScope } = useAdminBranch();
-  const categoryPresets = isVenadoScope ? VENADO_PRESETS : PARANA_PRESETS;
-  const defaultCategory = isVenadoScope ? PRODUCT_CATEGORY_VENADO_USADAS : PRODUCT_CATEGORY_USADAS;
   const [list, setList] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editId, setEditId] = useState<number | null>(null);
   const [nombre, setNombre] = useState('');
-  const [categoria, setCategoria] = useState(defaultCategory);
+  const [categoria, setCategoria] = useState(DEFAULT_PRODUCT_CATEGORY);
   const [descripcion, setDescripcion] = useState('');
   const [precio, setPrecio] = useState('');
   const [foto, setFoto] = useState<File | null>(null);
+  const [search, setSearch] = useState('');
+  const [filterCategoria, setFilterCategoria] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -52,14 +40,29 @@ const AdminProductosPage: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
-  const visibleList = isVenadoScope
-    ? list.filter((p) => p.categoria.trim().toLowerCase() === PRODUCT_CATEGORY_VENADO_USADAS.toLowerCase())
-    : list;
+  const categoriasEnListado = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of list) {
+      const c = p.categoria.trim();
+      if (c) map.set(c.toLowerCase(), c);
+    }
+    return Array.from(map.values()).sort((a, b) => a.localeCompare(b, 'es'));
+  }, [list]);
+
+  const filteredList = useMemo(() => {
+    let arr = list;
+    const q = search.trim().toLowerCase();
+    if (q) arr = arr.filter((p) => p.nombre.toLowerCase().includes(q) || p.categoria.toLowerCase().includes(q));
+    if (filterCategoria) {
+      arr = arr.filter((p) => p.categoria.trim().toLowerCase() === filterCategoria.toLowerCase());
+    }
+    return arr;
+  }, [list, search, filterCategoria]);
 
   const resetForm = () => {
     setEditId(null);
     setNombre('');
-    setCategoria(defaultCategory);
+    setCategoria(DEFAULT_PRODUCT_CATEGORY);
     setDescripcion('');
     setPrecio('');
     setFoto(null);
@@ -68,10 +71,6 @@ const AdminProductosPage: React.FC = () => {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (isVenadoScope && categoria.trim().toLowerCase() !== PRODUCT_CATEGORY_VENADO_USADAS.toLowerCase()) {
-      setError('En Venado Tuerto solo podés usar la categoría venado/Usadas');
-      return;
-    }
     try {
       const payload = {
         nombre: nombre.trim(),
@@ -108,9 +107,7 @@ const AdminProductosPage: React.FC = () => {
     <div>
       <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Productos</h1>
       <p className="text-sm text-gray-600 mb-4">
-        {isParanaScope
-          ? <>Usadas Paraná: <strong>{PRODUCT_CATEGORY_USADAS}</strong> · Venado: <strong>{PRODUCT_CATEGORY_VENADO_USADAS}</strong> · Eléctricas: <strong>{PRODUCT_CATEGORY_ELECTRICAS}</strong></>
-          : <>Solo categoría <strong>{PRODUCT_CATEGORY_VENADO_USADAS}</strong> para usadas de Venado Tuerto.</>}
+        Cascos, guantes, accesorios, repuestos y merchandising. Las motos usadas se cargan en <strong>Motos</strong> desmarcando 0 km.
       </p>
       <form onSubmit={submit} className="bg-white rounded-xl p-6 shadow ring-1 ring-gray-200 mb-8 grid md:grid-cols-2 gap-4">
         <div>
@@ -119,9 +116,9 @@ const AdminProductosPage: React.FC = () => {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-          <input list="cat-presets" value={categoria} onChange={(e) => setCategoria(e.target.value)} required readOnly={isVenadoScope} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+          <input list="cat-presets" value={categoria} onChange={(e) => setCategoria(e.target.value)} required className="w-full border border-gray-300 rounded-lg px-3 py-2" />
           <datalist id="cat-presets">
-            {categoryPresets.map((c) => <option key={c} value={c} />)}
+            {PRODUCT_CATEGORY_PRESETS.map((c) => <option key={c} value={c} />)}
           </datalist>
         </div>
         <div>
@@ -142,9 +139,30 @@ const AdminProductosPage: React.FC = () => {
         </div>
         {error && <p className="md:col-span-2 text-sm text-red-600">{error}</p>}
       </form>
-      {loading ? <p className="text-gray-600">Cargando…</p> : (
+      <div className="bg-white rounded-xl p-4 shadow ring-1 ring-gray-200 mb-6">
+        <div className="flex flex-col md:flex-row gap-4 md:items-end">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Nombre o categoría" className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+          </div>
+          <div className="min-w-[160px]">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+            <select value={filterCategoria} onChange={(e) => setFilterCategoria(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2">
+              <option value="">Todas</option>
+              {categoriasEnListado.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+        </div>
+        <p className="mt-3 text-sm text-gray-600">
+          Mostrando <span className="font-bold text-gray-900">{filteredList.length}</span> de{' '}
+          <span className="font-bold text-gray-900">{list.length}</span> productos
+        </p>
+      </div>
+      {loading ? <p className="text-gray-600">Cargando…</p> : filteredList.length === 0 ? (
+        <p className="text-gray-600">No hay productos con esos filtros.</p>
+      ) : (
         <div className="space-y-3">
-          {visibleList.map((p) => (
+          {filteredList.map((p) => (
             <div key={p.id} className="bg-white rounded-xl p-4 shadow ring-1 ring-gray-200 flex gap-4">
               <img src={mediaUrl(p.fotoUrl)} alt="" className="h-20 w-20 object-contain bg-gray-50 rounded-lg" />
               <div className="flex-1 min-w-0">

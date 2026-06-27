@@ -12,6 +12,7 @@ import { useAdminBranch } from '../auth/AdminBranchContext';
 import { motoSucursalLabel } from '../constants/sucursal';
 import { mediaUrl } from '../utils/mediaUrl';
 import { ApiError } from '../api/client';
+import { normalizeCilindrada, uniqueCilindradas } from '../utils/cilindrada';
 
 const emptyForm = (isParanaScope: boolean) => ({
   nombre: '',
@@ -35,11 +36,38 @@ const AdminMotosPage: React.FC = () => {
   const [form, setForm] = useState(emptyForm(isParanaScope));
   const [fotos, setFotos] = useState<File[]>([]);
   const [preserveEnParana, setPreserveEnParana] = useState(false);
+  const [search, setSearch] = useState('');
+  const [filterMarcaId, setFilterMarcaId] = useState('');
+  const [filterCilindrada, setFilterCilindrada] = useState('');
 
   const visibleList = useMemo(
     () => (isVenadoScope ? list.filter((m) => m.enVenado) : list),
     [list, isVenadoScope],
   );
+
+  const cilindradaFilterOptions = useMemo(
+    () => uniqueCilindradas(visibleList.map((m) => m.cilindrada)),
+    [visibleList],
+  );
+
+  const filteredList = useMemo(() => {
+    let arr = visibleList;
+    const q = search.trim().toLowerCase();
+    if (q) {
+      arr = arr.filter(
+        (m) => m.nombre.toLowerCase().includes(q) || m.marcaNombre.toLowerCase().includes(q),
+      );
+    }
+    if (filterMarcaId) arr = arr.filter((m) => m.marcaId === Number(filterMarcaId));
+    if (filterCilindrada) {
+      const target = normalizeCilindrada(filterCilindrada);
+      arr = arr.filter((m) => normalizeCilindrada(m.cilindrada) === target);
+    }
+    return arr;
+  }, [visibleList, search, filterMarcaId, filterCilindrada]);
+
+  const filtered0km = useMemo(() => filteredList.filter((m) => m.es0km), [filteredList]);
+  const filteredUsadas = useMemo(() => filteredList.filter((m) => !m.es0km), [filteredList]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -132,6 +160,26 @@ const AdminMotosPage: React.FC = () => {
     setFotos([]);
   };
 
+  const renderMotoRow = (m: Moto) => (
+    <div key={m.id} className="bg-white rounded-xl p-4 shadow ring-1 ring-gray-200 flex flex-col sm:flex-row gap-4 items-start">
+      <img src={mediaUrl(m.fotoPrincipalUrl)} alt="" className="h-24 w-24 object-contain bg-gray-50 rounded-lg" />
+      <div className="flex-1 min-w-0">
+        <h2 className="font-bold text-gray-900">{m.nombre}</h2>
+        <p className="text-sm text-gray-600">{m.marcaNombre} · {m.cilindrada} · {m.es0km ? '0 km' : `Año ${m.anio ?? '—'}`}</p>
+        <p className="text-xs text-[#f75000] font-semibold mt-1">{motoSucursalLabel(m.enParana, m.enVenado)}</p>
+        <p className="text-xs text-gray-500 mt-0.5">{m.activo ? 'Activa' : 'Inactiva'}</p>
+      </div>
+      <div className="flex flex-wrap gap-2 shrink-0">
+        <button type="button" onClick={() => startEdit(m)} className="text-[#f75000] font-semibold text-sm">Editar</button>
+        {m.activo ? (
+          <button type="button" onClick={async () => { await adminDeleteMoto(m.id); await load(); }} className="text-red-600 font-semibold text-sm">Desactivar</button>
+        ) : (
+          <button type="button" onClick={async () => { await adminReactivateMoto(m.id); await load(); }} className="text-green-700 font-semibold text-sm">Reactivar</button>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div>
       <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Motos</h1>
@@ -209,27 +257,67 @@ const AdminMotosPage: React.FC = () => {
         </div>
         {error && <p className="md:col-span-2 text-sm text-red-600">{error}</p>}
       </form>
-      {loading ? <p className="text-gray-600">Cargando…</p> : (
-        <div className="space-y-3">
-          {visibleList.map((m) => (
-            <div key={m.id} className="bg-white rounded-xl p-4 shadow ring-1 ring-gray-200 flex flex-col sm:flex-row gap-4 items-start">
-              <img src={mediaUrl(m.fotoPrincipalUrl)} alt="" className="h-24 w-24 object-contain bg-gray-50 rounded-lg" />
-              <div className="flex-1 min-w-0">
-                <h2 className="font-bold text-gray-900">{m.nombre}</h2>
-                <p className="text-sm text-gray-600">{m.marcaNombre} · {m.cilindrada} · {m.es0km ? '0 km' : `Año ${m.anio ?? '—'}`}</p>
-                <p className="text-xs text-[#f75000] font-semibold mt-1">{motoSucursalLabel(m.enParana, m.enVenado)}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{m.activo ? 'Activa' : 'Inactiva'}</p>
-              </div>
-              <div className="flex flex-wrap gap-2 shrink-0">
-                <button type="button" onClick={() => startEdit(m)} className="text-[#f75000] font-semibold text-sm">Editar</button>
-                {m.activo ? (
-                  <button type="button" onClick={async () => { await adminDeleteMoto(m.id); await load(); }} className="text-red-600 font-semibold text-sm">Desactivar</button>
-                ) : (
-                  <button type="button" onClick={async () => { await adminReactivateMoto(m.id); await load(); }} className="text-green-700 font-semibold text-sm">Reactivar</button>
-                )}
-              </div>
-            </div>
-          ))}
+      <div className="bg-white rounded-xl p-4 shadow ring-1 ring-gray-200 mb-6">
+        <div className="flex flex-col md:flex-row md:items-end gap-4 flex-wrap">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Nombre o marca"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            />
+          </div>
+          <div className="min-w-[140px]">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+            <select
+              value={filterMarcaId}
+              onChange={(e) => setFilterMarcaId(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            >
+              <option value="">Todas</option>
+              {marcas.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+            </select>
+          </div>
+          <div className="min-w-[140px]">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Cilindrada</label>
+            <select
+              value={filterCilindrada}
+              onChange={(e) => setFilterCilindrada(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            >
+              <option value="">Todas</option>
+              {cilindradaFilterOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+        </div>
+        <p className="mt-3 text-sm text-gray-600">
+          <span className="font-bold text-gray-900">{filtered0km.length}</span> 0 km ·{' '}
+          <span className="font-bold text-gray-900">{filteredUsadas.length}</span> usadas ·{' '}
+          <span className="font-bold text-gray-900">{filteredList.length}</span> de{' '}
+          <span className="font-bold text-gray-900">{visibleList.length}</span> motos
+        </p>
+      </div>
+      {loading ? <p className="text-gray-600">Cargando…</p> : filteredList.length === 0 ? (
+        <p className="text-gray-600">No hay motos con esos filtros.</p>
+      ) : (
+        <div className="space-y-10">
+          <div>
+            <h2 className="text-lg font-extrabold text-gray-900 mb-4">0 km ({filtered0km.length})</h2>
+            {filtered0km.length === 0 ? (
+              <p className="text-sm text-gray-500">Sin motos 0 km con estos filtros.</p>
+            ) : (
+              <div className="space-y-3">{filtered0km.map(renderMotoRow)}</div>
+            )}
+          </div>
+          <div>
+            <h2 className="text-lg font-extrabold text-gray-900 mb-4">Usadas ({filteredUsadas.length})</h2>
+            {filteredUsadas.length === 0 ? (
+              <p className="text-sm text-gray-500">Sin usadas con estos filtros.</p>
+            ) : (
+              <div className="space-y-3">{filteredUsadas.map(renderMotoRow)}</div>
+            )}
+          </div>
         </div>
       )}
     </div>

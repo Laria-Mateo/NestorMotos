@@ -16,7 +16,7 @@ const AdminDashboard: React.FC = () => (
       </Link>
       <Link to="/admin/panel/productos" className="bg-white rounded-xl p-6 shadow ring-1 ring-gray-200 hover:ring-[#f75000] transition">
         <h2 className="font-bold text-lg text-gray-900">Productos</h2>
-        <p className="text-sm text-gray-500 mt-1">Usadas, eléctricas y más</p>
+        <p className="text-sm text-gray-500 mt-1">Cascos, guantes, accesorios y repuestos</p>
       </Link>
     </div>
   </div>

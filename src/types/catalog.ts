@@ -7,6 +7,7 @@ export type CarouselMoto = {
   name: string;
   cc: number;
   cilindrada: string;
+  marcaId: number;
   marcaNombre: string;
   image: string;
   detailKind: 'moto' | 'producto';
@@ -45,6 +46,7 @@ export function motoToCarousel(m: Moto): CarouselMoto {
     name: m.nombre,
     cc: parseCilindradaCc(m.cilindrada),
     cilindrada: m.cilindrada,
+    marcaId: m.marcaId,
     marcaNombre: m.marcaNombre,
     image: mediaUrl(m.fotoPrincipalUrl),
     detailKind: 'moto',
@@ -58,6 +60,7 @@ export function productoToCarousel(p: Producto): CarouselMoto {
     name: p.nombre,
     cc: 0,
     cilindrada: '',
+    marcaId: 0,
     marcaNombre: p.categoria,
     image: mediaUrl(p.fotoUrl),
     detailKind: 'producto',

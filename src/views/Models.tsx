@@ -3,12 +3,11 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SectionTitle from '../components/SectionTitle';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { getAllMarcas, getAllMotos, getAllProductos } from '../api/catalogApi';
+import { getAllMarcas, getAllMotos } from '../api/catalogApi';
 import { branchSlugToApiSucursal } from '../constants/sucursal';
 import type { Marca } from '../api/types';
-import { isUsedProductCategory } from '../constants/categories';
 import { normalizeCilindrada, uniqueCilindradas } from '../utils/cilindrada';
-import { motoToCard, productoToCard, type CatalogCard } from '../types/catalog';
+import { motoToCard, type CatalogCard } from '../types/catalog';
 import { resolveBranchSlug } from '../utils/branch';
 
 const Models: React.FC = () => {
@@ -32,17 +31,13 @@ const Models: React.FC = () => {
       setLoading(true);
       try {
         const sucursal = branchSlugToApiSucursal(branchSlug);
-        const [marcaList, motoList, productoList] = await Promise.all([
+        const [marcaList, motoList] = await Promise.all([
           getAllMarcas(),
           getAllMotos({ sucursal, es0km: true }),
-          getAllProductos(),
         ]);
         if (cancelled) return;
         setMarcas(marcaList);
-        const extra = productoList
-          .filter((p) => !isUsedProductCategory(p.categoria))
-          .map(productoToCard);
-        setItems([...motoList.map(motoToCard), ...extra]);
+        setItems(motoList.map(motoToCard));
       } finally {
         if (!cancelled) setLoading(false);
       }

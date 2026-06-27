@@ -10,8 +10,11 @@ import WhatsAppButton from '../components/WhatsAppButton';
 import FinancingModal from '../components/FinancingModal';
 import TallerModal from '../components/TallerModal';
 import SectionTitle from '../components/SectionTitle';
-import { getAllMotos, getAllProductos } from '../api/catalogApi';
+import BrandFilterBar from '../components/BrandFilterBar';
+import { getAllMarcas, getAllMotos, getAllProductos } from '../api/catalogApi';
+import type { Marca } from '../api/types';
 import { PRODUCT_CATEGORY_ELECTRICAS } from '../constants/categories';
+import { branchLocations } from '../constants/branchLocations';
 import {
   groupCarouselMotos,
   motoToCarousel,
@@ -29,6 +32,8 @@ import { resolveBranchSlug } from '../utils/branch';
 // };
 
 const groupMotosByCategory = (motos: CarouselMoto[]): CarouselBuckets => groupCarouselMotos(motos);
+
+type CarouselTab = CilindradaBucket | 'quads' | 'electricas';
 
 const financingOptions = [
   {
@@ -72,7 +77,9 @@ const Landing: React.FC = () => {
     quads: [],
   });
   const [electricMotos, setElectricMotos] = useState<CarouselMoto[]>([]);
-  const [activeTab, setActiveTab] = useState<CilindradaBucket | 'quads' | 'electricas'>('cc110');
+  const [marcas, setMarcas] = useState<Marca[]>([]);
+  const [selectedMarcaId, setSelectedMarcaId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<CarouselTab | null>('cc110');
   const [selectedFinancingOption, setSelectedFinancingOption] = useState<1 | 2 | 3 | null>(null);
   const [isTallerModalOpen, setIsTallerModalOpen] = useState(false);
 
@@ -80,9 +87,16 @@ const Landing: React.FC = () => {
     let cancelled = false;
     (async () => {
       const sucursal = branchSlugToApiSucursal(branch);
-      const motos = await getAllMotos({ sucursal, es0km: true });
+      const [motos, marcasData] = await Promise.all([
+        getAllMotos({ sucursal, es0km: true }),
+        getAllMarcas(),
+      ]);
       if (cancelled) return;
-      setMotoCategories(groupMotosByCategory(motos.map(motoToCarousel)));
+      const carousel = motos.map(motoToCarousel);
+      setMotoCategories(groupMotosByCategory(carousel));
+      setMarcas(marcasData.filter((m) => m.activo));
+      setSelectedMarcaId(null);
+      setActiveTab('cc110');
     })();
     return () => { cancelled = true; };
   }, [branch]);
@@ -152,7 +166,7 @@ const Landing: React.FC = () => {
   );
 
   const categoryTabs = useMemo(() => {
-    const rows: { key: typeof activeTab; label: string }[] = availableCategories.map((c) => ({
+    const rows: { key: CarouselTab; label: string }[] = availableCategories.map((c) => ({
       key: c.key,
       label: c.label,
     }));
@@ -163,6 +177,8 @@ const Landing: React.FC = () => {
   }, [availableCategories, electricMotos.length]);
 
   useEffect(() => {
+    if (selectedMarcaId) return;
+
     if (activeTab === 'electricas') {
       if (electricMotos.length === 0) {
         const first = availableCategories[0];
@@ -170,12 +186,65 @@ const Landing: React.FC = () => {
       }
       return;
     }
+    if (!activeTab) {
+      if (availableCategories[0]) setActiveTab(availableCategories[0].key);
+      else if (electricMotos.length > 0) setActiveTab('electricas');
+      return;
+    }
     const motosInTab = motoCategories[activeTab];
     if (!motosInTab || motosInTab.length === 0) {
       if (electricMotos.length > 0) setActiveTab('electricas');
       else if (availableCategories[0]) setActiveTab(availableCategories[0].key);
     }
-  }, [motoCategories, activeTab, electricMotos.length, availableCategories]);
+  }, [motoCategories, activeTab, electricMotos.length, availableCategories, selectedMarcaId]);
+
+  const allMotosInCarousel = useMemo(
+    () => [
+      ...motoCategories.cc110,
+      ...motoCategories.cc125_150,
+      ...motoCategories.cc160plus,
+      ...motoCategories.quads,
+    ],
+    [motoCategories],
+  );
+
+  const handleCilindradaTab = (key: CarouselTab) => {
+    setSelectedMarcaId(null);
+    setActiveTab(key);
+  };
+
+  const handleMarcaSelect = (marcaId: number | null) => {
+    if (marcaId) {
+      setSelectedMarcaId(marcaId);
+      setActiveTab(null);
+      return;
+    }
+    setSelectedMarcaId(null);
+    const first = availableCategories[0]?.key;
+    if (first) setActiveTab(first);
+    else if (electricMotos.length > 0) setActiveTab('electricas');
+  };
+
+  const marcasConMotos = useMemo(() => {
+    const ids = new Set<number>();
+    for (const bucket of Object.values(motoCategories)) {
+      for (const m of bucket) ids.add(m.marcaId);
+    }
+    return marcas
+      .filter((m) => ids.has(m.id))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+  }, [marcas, motoCategories]);
+
+  const carouselMotos = useMemo(() => {
+    if (selectedMarcaId) {
+      return allMotosInCarousel.filter((m) => m.marcaId === selectedMarcaId);
+    }
+    if (activeTab === 'electricas') return electricMotos;
+    if (activeTab) return motoCategories[activeTab] ?? [];
+    return [];
+  }, [activeTab, motoCategories, electricMotos, selectedMarcaId, allMotosInCarousel]);
+
+  const locations = branchLocations(branch);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -230,79 +299,7 @@ const Landing: React.FC = () => {
             </div>
           </div>
         </section>
-        
-        <section id="about" className="py-20 bg-white border-b border-gray-200">
-          <div className="max-w-4xl mx-auto px-4">
-            <SectionTitle>Sobre Nosotros</SectionTitle>
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="flex flex-col gap-6">
-                <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
-                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                  </span>
-                  <span className="text-lg font-semibold text-black">Financiamos tu moto <span className="text-[#ff6600] font-bold">solo con DNI</span></span>
-                </div>
-                <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
-                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 17v-2a4 4 0 014-4h8a4 4 0 014 4v2" /><circle cx="12" cy="7" r="4" stroke="#ff6600" strokeWidth={2}/></svg>
-                  </span>
-                  <span className="text-lg font-semibold text-black">Trabajamos <span className="text-[#ff6600] font-bold">todas las marcas</span></span>
-                </div>
-                <div className="flex items-start gap-4 bg-gray-50 rounded-xl shadow p-4">
-                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><circle cx="12" cy="12" r="10" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" /></svg>
-                  </span>
-                  <div className="text-lg font-semibold text-black">
-                    Horarios
-                    <div className="mt-1 text-base font-normal text-black/80 leading-relaxed">
-                      <div><span className="text-[#ff6600] font-bold">Lunes a Viernes</span>: 08:00–13:00 y 16:00–20:00</div>
-                      <div><span className="text-[#ff6600] font-bold">Sábados</span>: 09:00–13:00</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between gap-4 bg-gray-50 rounded-xl shadow p-4">
-                  <div className="flex items-center gap-4">
-                    <span className="bg-[#ff6600]/10 p-3 rounded-full">
-                      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17l3-3 3 3M9 7l3 3 3-3" /></svg>
-                    </span>
-                    <span className="text-lg font-bold text-[#ff6600] uppercase">TALLER PROPIO</span>
-                  </div>
-                  <button
-                    onClick={() => setIsTallerModalOpen(true)}
-                    className="px-4 py-2 bg-[#ff6600] hover:bg-[#ff7a33] text-white font-bold rounded-xl transition"
-                  >
-                    Por turnos
-                  </button>
-                </div>
-                { /*<div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
-                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-4-4h-1" /><circle cx="9" cy="7" r="4" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 11v9" /></svg>
-                  </span>
-                  <span className="text-lg font-semibold text-black">Casa Central: <span className="text-[#ff6600] font-bold">@nestormotosvenadotuerto Venado Tuerto - SF</span></span>
-                </div>*/}
-              </div>
-              <div className="flex flex-col gap-4 items-center">
-                {/* MapSwitcher removido; se define por sucursal elegida */}
-                <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden w-full h-72 flex items-center justify-center relative">
-                  <iframe
-                    title={`Mapa ${branch === 'parana' ? 'Paraná' : 'Venado Tuerto'}`}
-                    src={`https://www.google.com/maps?q=${branch === 'parana' ? '-31.756278196473883,-60.53260317611488' : '-33.74189278721354,-61.958780955946374'}&z=17&output=embed`}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  ></iframe>
-                </div>
-                <div className="text-base text-black font-semibold text-center mt-2">
-                  Dirección: <span className="text-[#ff6600] font-bold">{branch === 'parana' ? 'Esquina Av. Espejo, Leopoldo Lugones y, E3100 Paraná, Entre Ríos' : 'Av. Sta. Fe 740, S2600 Venado Tuerto, Santa Fe'}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        
+
         <section id="models" className="py-20 bg-gradient-to-b from-gray-200 via-gray-300 to-gray-200 border-b border-gray-300">
           <div className="max-w-5xl mx-auto px-4">
             <SectionTitle>Modelos que trabajamos</SectionTitle>
@@ -311,8 +308,8 @@ const Landing: React.FC = () => {
                 <button
                   key={c.key}
                   type="button"
-                  className={`px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm ${activeTab === c.key ? 'bg-[#ff6600] text-white border-[#ff6600] scale-105' : 'bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10'}`}
-                  onClick={() => setActiveTab(c.key)}
+                  className={`px-6 py-2 rounded-full font-bold text-lg uppercase tracking-widest border-2 transition-all shadow-sm ${activeTab === c.key && selectedMarcaId === null ? 'bg-[#ff6600] text-white border-[#ff6600] scale-105' : 'bg-white text-[#ff6600] border-[#ff6600] hover:bg-[#ff6600]/10'}`}
+                  onClick={() => handleCilindradaTab(c.key)}
                 >
                   {c.label}
                 </button>
@@ -324,11 +321,18 @@ const Landing: React.FC = () => {
                 Usadas
               </a>
             </div>
-            {activeTab === 'electricas' && <MotoCarousel motos={electricMotos} />}
-            {activeTab === 'cc110' && <MotoCarousel motos={motoCategories.cc110} />}
-            {activeTab === 'cc125_150' && <MotoCarousel motos={motoCategories.cc125_150} />}
-            {activeTab === 'cc160plus' && <MotoCarousel motos={motoCategories.cc160plus} />}
-            {activeTab === 'quads' && <MotoCarousel motos={motoCategories.quads} />}
+            {activeTab !== 'electricas' && marcasConMotos.length > 0 && (
+              <BrandFilterBar
+                marcas={marcasConMotos}
+                selectedMarcaId={selectedMarcaId}
+                onSelect={handleMarcaSelect}
+              />
+            )}
+            {carouselMotos.length === 0 ? (
+              <p className="text-center text-gray-600 py-8">No hay modelos con ese filtro en esta categoría.</p>
+            ) : (
+              <MotoCarousel motos={carouselMotos} />
+            )}
 
             <div className="mt-6 text-center">
               <Link
@@ -374,10 +378,6 @@ const Landing: React.FC = () => {
               onClose={() => setSelectedFinancingOption(null)}
               option={selectedFinancingOption || 1}
             />
-            <TallerModal
-              isOpen={isTallerModalOpen}
-              onClose={() => setIsTallerModalOpen(false)}
-            />
           </div>
         </section>
         
@@ -387,6 +387,81 @@ const Landing: React.FC = () => {
             <ContactForm />
           </div>
         </section>
+
+        <section id="about" className="py-20 bg-white border-b border-gray-200">
+          <div className="max-w-4xl mx-auto px-4">
+            <SectionTitle>Sobre Nosotros</SectionTitle>
+            <div className="grid md:grid-cols-2 gap-8 items-start">
+              <div className="flex flex-col gap-6">
+                <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
+                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  </span>
+                  <span className="text-lg font-semibold text-black">Financiamos tu moto <span className="text-[#ff6600] font-bold">solo con DNI</span></span>
+                </div>
+                <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
+                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 17v-2a4 4 0 014-4h8a4 4 0 014 4v2" /><circle cx="12" cy="7" r="4" stroke="#ff6600" strokeWidth={2}/></svg>
+                  </span>
+                  <span className="text-lg font-semibold text-black">Trabajamos <span className="text-[#ff6600] font-bold">todas las marcas</span></span>
+                </div>
+                <div className="flex items-start gap-4 bg-gray-50 rounded-xl shadow p-4">
+                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><circle cx="12" cy="12" r="10" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" /></svg>
+                  </span>
+                  <div className="text-lg font-semibold text-black">
+                    Horarios
+                    <div className="mt-1 text-base font-normal text-black/80 leading-relaxed">
+                      <div><span className="text-[#ff6600] font-bold">Lunes a Viernes</span>: 08:00–13:00 y 16:00–20:00</div>
+                      <div><span className="text-[#ff6600] font-bold">Sábados</span>: 09:00–13:00</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-4 bg-gray-50 rounded-xl shadow p-4">
+                  <div className="flex items-center gap-4">
+                    <span className="bg-[#ff6600]/10 p-3 rounded-full">
+                      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17l3-3 3 3M9 7l3 3 3-3" /></svg>
+                    </span>
+                    <span className="text-lg font-bold text-[#ff6600] uppercase">TALLER PROPIO</span>
+                  </div>
+                  <button
+                    onClick={() => setIsTallerModalOpen(true)}
+                    className="px-4 py-2 bg-[#ff6600] hover:bg-[#ff7a33] text-white font-bold rounded-xl transition"
+                  >
+                    Por turnos
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-col gap-6">
+                {locations.map((loc) => (
+                  <div key={loc.label} className="flex flex-col gap-3">
+                    <h3 className="text-sm font-bold text-[#ff6600] uppercase tracking-wide">{loc.label}</h3>
+                    <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden w-full h-56">
+                      <iframe
+                        title={`Mapa ${loc.label}`}
+                        src={`https://www.google.com/maps?q=${loc.mapQuery}&z=17&output=embed`}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                      />
+                    </div>
+                    <p className="text-base text-black font-semibold text-center">
+                      <span className="text-[#ff6600] font-bold">{loc.address}</span>
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <TallerModal
+          isOpen={isTallerModalOpen}
+          onClose={() => setIsTallerModalOpen(false)}
+        />
 
         <section
           id="reviews"
