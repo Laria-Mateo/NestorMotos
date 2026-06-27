@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { BrowserRouter } from 'react-router-dom'
+import { AuthProvider } from './auth/AuthContext'
+import { AdminBranchProvider } from './auth/AdminBranchContext'
 
 // Clear branch selection on hard refresh to allow re-choosing branch,
 // except when a branch change was just requested from the navbar
@@ -19,7 +21,11 @@ try {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <AuthProvider>
+        <AdminBranchProvider>
+          <App />
+        </AdminBranchProvider>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )

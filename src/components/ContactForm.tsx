@@ -1,14 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import motorbikesParana from '../data/motorbikesParana.json';
+import { getAllMotos } from '../api/catalogApi';
+import { branchSlugToApiSucursal } from '../constants/sucursal';
+import { resolveBranchSlug } from '../utils/branch';
+import type { Moto } from '../api/types';
+import { normalizeCilindrada, uniqueCilindradas } from '../utils/cilindrada';
 
-const WHATSAPP_PARANA = '5493433007984'; // Paraná
-const WHATSAPP_VENADO = '5493462252244'; // Venado Tuerto
-
-// Sitio actual: usar siempre dataset de Paraná
-const allMotorbikes = [...motorbikesParana];
+const WHATSAPP_PARANA = '5493433007984';
+const WHATSAPP_VENADO = '5493462252244';
 
 const ContactForm: React.FC = () => {
+  const [motos, setMotos] = useState<Moto[]>([]);
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [dni, setDni] = useState('');
@@ -22,14 +24,22 @@ const ContactForm: React.FC = () => {
   const [touched, setTouched] = useState(false);
   
 
-  // Usar siempre Paraná
-  const dataset = motorbikesParana;
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const branch = resolveBranchSlug();
+      const list = await getAllMotos({ sucursal: branchSlugToApiSucursal(branch), es0km: true });
+      if (!cancelled) setMotos(list);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
-  // Opciones de cilindrada y modelos filtradas por sucursal
-  const cilindradasUnicas = useMemo(() => Array.from(new Set(dataset.map(m => m.cc))).sort((a, b) => a - b), [dataset]);
-  const modelosFiltrados = useMemo(() => (cilindrada ? dataset.filter(m => String(m.cc) === cilindrada) : []), [cilindrada, dataset]);
-  const modelosUnicos = Array.from(new Set(modelosFiltrados.map(m => m.name)));
-  // const modeloSeleccionado = motorbikes.find(m => m.name === modelo && String(m.cc) === cilindrada);
+  const cilindradasUnicas = useMemo(() => uniqueCilindradas(motos.map((m) => m.cilindrada)), [motos]);
+  const modelosFiltrados = useMemo(
+    () => (cilindrada ? motos.filter((m) => normalizeCilindrada(m.cilindrada) === normalizeCilindrada(cilindrada)) : []),
+    [cilindrada, motos],
+  );
+  const modelosUnicos = Array.from(new Set(modelosFiltrados.map((m) => m.nombre)));
 
   // Prellenar desde query param modelId
   const location = useLocation();
@@ -37,14 +47,14 @@ const ContactForm: React.FC = () => {
     const params = new URLSearchParams(location.search);
     const modelId = params.get('modelId');
     if (modelId) {
-      const found = allMotorbikes.find(m => m.id === modelId);
+      const found = motos.find((m) => String(m.id) === modelId);
       if (found) {
         setUsadas(false);
-        setCilindrada(String(found.cc));
-        setModelo(found.name);
+        setCilindrada(found.cilindrada);
+        setModelo(found.nombre);
         setObservaciones(prev => prev && !prev.includes('Consulta por modelo')
-          ? `${prev}\nConsulta por modelo: ${found.name}`
-          : prev || `Consulta por modelo: ${found.name}`);
+          ? `${prev}\nConsulta por modelo: ${found.nombre}`
+          : prev || `Consulta por modelo: ${found.nombre}`);
       }
     }
     // Prellenado desde Usadas
@@ -66,7 +76,7 @@ const ContactForm: React.FC = () => {
         sessionStorage.removeItem('usedKm');
       }
     } catch {}
-  }, [location.search]);
+  }, [location.search, motos]);
 
   
 
@@ -95,7 +105,7 @@ const ContactForm: React.FC = () => {
     if (usadas) {
       mensaje += `Quiero consultar por motos usadas.\n`;
     } else {
-      mensaje += `Cilindrada: ${cilindrada}cc.\n`;
+      mensaje += `Cilindrada: ${cilindrada}.\n`;
       mensaje += `Modelo: ${modelo}.\n`;
   
     }
@@ -194,8 +204,8 @@ const ContactForm: React.FC = () => {
             <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="cilindrada">Cilindrada</label>
             <select id="cilindrada" className={`bg-white border ${showErrors && !cilindrada ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition shadow-sm w-full min-w-0 max-w-full`} value={cilindrada} onChange={e => { setCilindrada(e.target.value); setModelo(''); setTouched(true); }} onFocus={() => setTouched(true)} required>
               <option value="">-- Elegir cilindrada --</option>
-              {cilindradasUnicas.map((cc, idx) => (
-                <option key={idx} value={cc}>{cc}cc</option>
+              {cilindradasUnicas.map((cc) => (
+                <option key={cc} value={cc}>{cc}</option>
               ))}
             </select>
           </div>

@@ -2,103 +2,86 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SectionTitle from '../components/SectionTitle';
-import motorbikesParana from '../data/motorbikesParana.json';
-import { Link, useSearchParams } from 'react-router-dom';
-import { ProductService } from '../services/productService';
-import { getUsedMotoDisplayImage } from '../utils/usedMotoImage';
-
-type Moto = {
-  id: string;
-  name: string;
-  cc: number;
-  isQuad: boolean;
-  image: string;
-  colors?: string[];
-};
-
-type CatalogEntry = Moto & { kind: 'catalog' };
-
-type MultisiteEntry = {
-  kind: 'multisite';
-  id: string;
-  name: string;
-  cc: number;
-  isQuad: false;
-  image: string;
-  categoryLabel?: string;
-};
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { getAllMarcas, getAllMotos, getAllProductos } from '../api/catalogApi';
+import { branchSlugToApiSucursal } from '../constants/sucursal';
+import type { Marca } from '../api/types';
+import { isUsedProductCategory } from '../constants/categories';
+import { normalizeCilindrada, uniqueCilindradas } from '../utils/cilindrada';
+import { motoToCard, productoToCard, type CatalogCard } from '../types/catalog';
+import { resolveBranchSlug } from '../utils/branch';
 
 const Models: React.FC = () => {
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }, []);
+  const { branch } = useParams<{ branch: string }>();
+  const branchSlug = resolveBranchSlug(branch);
+
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'auto' }); }, []);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const catalogEntries = useMemo<CatalogEntry[]>(
-    () => (motorbikesParana as Moto[]).map((m) => ({ ...m, kind: 'catalog' as const })),
-    [],
-  );
-  const [multisiteEntries, setMultisiteEntries] = useState<MultisiteEntry[]>([]);
+  const [marcas, setMarcas] = useState<Marca[]>([]);
+  const [items, setItems] = useState<CatalogCard[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [query, setQuery] = useState(searchParams.get('q') || '');
+  const [marcaId, setMarcaId] = useState(searchParams.get('marca') || '');
+  const [cilindrada, setCilindrada] = useState(searchParams.get('cc') || '');
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const products = await ProductService.getProductsExcludingUsadas();
-      if (cancelled) return;
-      setMultisiteEntries(
-        products.map((u, i) => ({
-          kind: 'multisite' as const,
-          id: u.id,
-          name: u.name,
-          cc: 0,
-          isQuad: false,
-          image: getUsedMotoDisplayImage(u, i),
-          categoryLabel: u.categoryName?.trim() || undefined,
-        })),
-      );
+      setLoading(true);
+      try {
+        const sucursal = branchSlugToApiSucursal(branchSlug);
+        const [marcaList, motoList, productoList] = await Promise.all([
+          getAllMarcas(),
+          getAllMotos({ sucursal, es0km: true }),
+          getAllProductos(),
+        ]);
+        if (cancelled) return;
+        setMarcas(marcaList);
+        const extra = productoList
+          .filter((p) => !isUsedProductCategory(p.categoria))
+          .map(productoToCard);
+        setItems([...motoList.map(motoToCard), ...extra]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [branchSlug]);
 
-  const combined = useMemo(() => [...catalogEntries, ...multisiteEntries], [catalogEntries, multisiteEntries]);
-
-  const [query, setQuery] = useState<string>(searchParams.get('q') || '');
-  const [cc, setCc] = useState<string>(searchParams.get('cc') || '');
-  const [onlyQuads, setOnlyQuads] = useState<boolean>(searchParams.get('quads') === '1');
-
-  const ccOptions = useMemo(() => {
-    const all = combined.map((m) => m.cc);
-    return Array.from(new Set(all)).sort((a, b) => a - b);
-  }, [combined]);
+  const cilindradaOptions = useMemo(
+    () => uniqueCilindradas(items.filter((m) => m.detailKind === 'moto').map((m) => m.cilindrada)),
+    [items],
+  );
 
   const filtered = useMemo(() => {
-    let list = combined.slice();
-    if (query.trim()) {
-      const q = query.trim().toLowerCase();
-      list = list.filter((m) => m.name.toLowerCase().includes(q));
+    let list = items.slice();
+    const q = query.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (m) => m.name.toLowerCase().includes(q) || m.marcaNombre.toLowerCase().includes(q),
+      );
     }
-    if (cc) {
-      const ccNum = Number(cc);
-      list = list.filter((m) => m.cc === ccNum);
+    if (marcaId) {
+      const mid = Number(marcaId);
+      list = list.filter((m) => m.detailKind === 'producto' || m.marcaId === mid);
     }
-    if (onlyQuads) {
-      list = list.filter((m) => m.isQuad);
+    if (cilindrada) {
+      const target = normalizeCilindrada(cilindrada);
+      list = list.filter(
+        (m) => m.detailKind === 'producto' || normalizeCilindrada(m.cilindrada) === target,
+      );
     }
     return list;
-  }, [query, cc, onlyQuads, combined]);
+  }, [items, query, marcaId, cilindrada]);
 
-  const updateParams = (next: Partial<{ q: string; cc: string; quads: string }>) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (next.q !== undefined) {
-      if (next.q) newParams.set('q', next.q); else newParams.delete('q');
-    }
-    if (next.cc !== undefined) {
-      if (next.cc) newParams.set('cc', next.cc); else newParams.delete('cc');
-    }
-    if (next.quads !== undefined) {
-      if (next.quads) newParams.set('quads', next.quads); else newParams.delete('quads');
-    }
-    setSearchParams(newParams);
+  const updateParams = (next: Partial<{ q: string; marca: string; cc: string }>) => {
+    const p = new URLSearchParams(searchParams);
+    if (next.q !== undefined) { if (next.q) p.set('q', next.q); else p.delete('q'); }
+    if (next.marca !== undefined) { if (next.marca) p.set('marca', next.marca); else p.delete('marca'); }
+    if (next.cc !== undefined) { if (next.cc) p.set('cc', next.cc); else p.delete('cc'); }
+    setSearchParams(p);
   };
 
   return (
@@ -108,83 +91,52 @@ const Models: React.FC = () => {
         <section className="py-12 border-b border-gray-200 bg-white">
           <div className="max-w-6xl mx-auto px-4">
             <SectionTitle className="mb-6">Todos los Modelos</SectionTitle>
-            <div className="flex flex-col md:flex-row gap-4 md:items-end">
-              <div className="flex-1">
+            <div className="flex flex-col md:flex-row flex-wrap gap-4 md:items-end">
+              <div className="flex-1 min-w-[200px]">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
-                <input
-                  value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    updateParams({ q: e.target.value });
-                  }}
-                  placeholder="Buscar por nombre (ej: Honda, FZ, etc.)"
-                  className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <input value={query} onChange={(e) => { setQuery(e.target.value); updateParams({ q: e.target.value }); }} placeholder="Nombre o marca" className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cilindrada</label>
-                <select
-                  value={cc}
-                  onChange={(e) => {
-                    setCc(e.target.value);
-                    updateParams({ cc: e.target.value });
-                  }}
-                  className="bg-white border border-gray-300 rounded-lg px-4 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                >
+              <div className="min-w-[140px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+                <select value={marcaId} onChange={(e) => { setMarcaId(e.target.value); updateParams({ marca: e.target.value }); }} className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
                   <option value="">Todas</option>
-                  {ccOptions.map((opt) => (
-                    <option key={opt} value={opt}>{opt === 0 ? 'Eléctrica / sin cilindrada' : `${opt}cc`}</option>
-                  ))}
+                  {marcas.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
                 </select>
               </div>
-              <label className="inline-flex items-center gap-2 text-gray-700 select-none">
-                <input
-                  type="checkbox"
-                  checked={onlyQuads}
-                  onChange={(e) => {
-                    setOnlyQuads(e.target.checked);
-                    updateParams({ quads: e.target.checked ? '1' : '' });
-                  }}
-                  className="accent-primary w-5 h-5"
-                />
-                Solo cuatriciclos
-              </label>
+              <div className="min-w-[140px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cilindrada</label>
+                <select value={cilindrada} onChange={(e) => { setCilindrada(e.target.value); updateParams({ cc: e.target.value }); }} className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                  <option value="">Todas</option>
+                  {cilindradaOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
             </div>
           </div>
         </section>
-
         <section className="py-12">
           <div className="max-w-6xl mx-auto px-4">
-            {filtered.length === 0 ? (
+            {loading ? (
+              <p className="text-center text-gray-600">Cargando modelos...</p>
+            ) : filtered.length === 0 ? (
               <p className="text-center text-gray-600">No se encontraron modelos con esos filtros.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-items-center">
                 {filtered.map((moto) => (
                   <Link
-                    to={moto.kind === 'multisite' ? `../usadas/${moto.id}` : moto.id}
-                    key={`${moto.kind}-${moto.id}`}
-                    className="group bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200 max-w-[320px] md:max-w-[340px] w-full"
+                    key={`${moto.detailKind}-${moto.id}`}
+                    to={`/${branchSlug}/modelos/${moto.id}`}
+                    className="group bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden ring-1 ring-gray-200 max-w-[320px] w-full"
                   >
-                    <div className="aspect-[4/5] bg-white flex items-center justify-center overflow-hidden">
-                      <img
-                        src={moto.image}
-                        alt={moto.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition"
-                        onError={(e) => {
-                          const img = e.currentTarget as HTMLImageElement;
-                          img.onerror = null;
-                          img.src = '/logoSinFondo3.webp';
-                        }}
-                      />
+                    <div className="aspect-[4/5] bg-white flex items-center justify-center p-2">
+                      <img src={moto.image} alt={moto.name} className="w-full h-full object-contain group-hover:scale-105 transition" />
                     </div>
                     <div className="p-4 border-t border-gray-100">
-                      <h3 className="text-base font-bold text-gray-900 leading-snug truncate" title={moto.name}>{moto.name}</h3>
-                      {moto.kind === 'multisite' && moto.categoryLabel && (
-                        <div className="text-xs text-gray-600 mt-0.5">{moto.categoryLabel}</div>
-                      )}
-                      {moto.kind === 'catalog' && moto.isQuad && (
-                        <div className="text-xs text-gray-600 mt-0.5">Cuatriciclo</div>
-                      )}
+                      <h3 className="text-base font-bold text-gray-900 truncate">{moto.name}</h3>
+                      <div className="text-xs text-gray-600 mt-0.5">
+                        {moto.detailKind === 'producto'
+                          ? moto.marcaNombre
+                          : `${moto.marcaNombre} · ${moto.cilindrada || `${moto.cc}cc`}`}
+                      </div>
                     </div>
                   </Link>
                 ))}

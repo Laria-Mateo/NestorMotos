@@ -2,19 +2,10 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-// import { Link, useNavigate } from "react-router-dom"
-
-type Moto = {
-  id: string
-  name: string
-  cc: number
-  isQuad: boolean
-  image: string
-}
+import type { CarouselMoto } from "../types/catalog"
 
 type MotoCarouselProps = {
-  motos: Moto[]
-  detailHref?: "modelos" | "usadas"
+  motos: CarouselMoto[]
 }
 
 const ArrowLeft = () => (
@@ -45,10 +36,10 @@ const CloseIcon = () => (
 
 // Título limpiado (no usado actualmente)
 
-const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, detailHref = "modelos" }) => {
+const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos }) => {
   const [current, setCurrent] = useState(0)
   const [showModal, setShowModal] = useState(false)
-  const [modalMoto, setModalMoto] = useState<Moto | null>(null)
+  const [modalMoto, setModalMoto] = useState<CarouselMoto | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [isTouching, setIsTouching] = useState(false)
@@ -196,10 +187,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, detailHref = "modelo
     Naranja: "#f75000",
   }
 
-  // Modal de detalles
-  const detailPathSegment = detailHref === "usadas" ? "usadas" : "modelos"
-
-  const Modal = ({ moto, onClose }: { moto: Moto; onClose: () => void }) => {
+  const Modal = ({ moto, onClose }: { moto: CarouselMoto; onClose: () => void }) => {
     const isClosingRef = useRef(false);
 
     const handleBackdropClick = (e: React.MouseEvent) => {
@@ -283,18 +271,18 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, detailHref = "modelo
           {/* Botón Más info fijo en la parte inferior */}
           <div className="px-4 md:px-8 py-4 md:py-6 bg-white border-t border-gray-200 flex-shrink-0">
             <a
-              href={`../${detailPathSegment}/${moto.id}`}
+              href={`../modelos/${moto.id}`}
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 const branch = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : 'parana';
-                window.location.assign(`/${branch}/${detailPathSegment}/${moto.id}`);
+                window.location.assign(`/${branch}/modelos/${moto.id}`);
               }}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 const branch = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : 'parana';
-                window.location.assign(`/${branch}/${detailPathSegment}/${moto.id}`);
+                window.location.assign(`/${branch}/modelos/${moto.id}`);
               }}
               className="mx-auto block w-full max-w-xs text-center bg-[#f75000] text-white font-semibold px-6 py-3 rounded-full shadow-sm hover:bg-[#ff7a33] active:bg-[#cc3f00] focus:outline-none focus:ring-2 focus:ring-[#f75000]/40 text-base select-none"
             >
@@ -309,7 +297,7 @@ const MotoCarousel: React.FC<MotoCarouselProps> = ({ motos, detailHref = "modelo
 
   if (length === 0) return null
 
-  const activeMoto: Moto | undefined = length > 0 ? motos[current] : undefined
+  const activeMoto: CarouselMoto | undefined = length > 0 ? motos[current] : undefined
 
   return (
     <div className="mb-20">

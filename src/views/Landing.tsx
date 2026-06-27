@@ -9,45 +9,26 @@ import ContactForm from '../components/ContactForm';
 import WhatsAppButton from '../components/WhatsAppButton';
 import FinancingModal from '../components/FinancingModal';
 import TallerModal from '../components/TallerModal';
-// ... otros imports de componentes (SectionTitle, etc.)
 import SectionTitle from '../components/SectionTitle';
-
-// import reviewsData from '../data/googleReviews.json';
-// Siempre usar el dataset de Paraná también para Venado
-import motorbikesParana from '../data/motorbikesParana.json';
-import { ProductService, MULTISITE_CATEGORY_ELECTRICAS } from '../services/productService';
-import { getUsedMotoDisplayImage } from '../utils/usedMotoImage';
-
-// Definir el tipo de moto
-interface Moto {
-  id: string;
-  name: string;
-  cc: number;
-  isQuad: boolean;
-  image: string;
-}
-
-// Definir el tipo de categorías
-interface MotoCategories {
-  cc110: Moto[];
-  cc125_150: Moto[];
-  cc160plus: Moto[];
-  quads: Moto[];
-}
+import { getAllMotos, getAllProductos } from '../api/catalogApi';
+import { PRODUCT_CATEGORY_ELECTRICAS } from '../constants/categories';
+import {
+  groupCarouselMotos,
+  motoToCarousel,
+  productoToCarousel,
+  type CarouselBuckets,
+  type CarouselMoto,
+} from '../types/catalog';
+import { CILINDRADA_BUCKET_LABELS, type CilindradaBucket } from '../utils/cilindrada';
+import { branchSlugToApiSucursal } from '../constants/sucursal';
+import { resolveBranchSlug } from '../utils/branch';
 
 // const getRandomReviews = (reviews: typeof reviewsData, count: number) => {
 //   const shuffled = [...reviews].sort(() => 0.5 - Math.random());
 //   return shuffled.slice(0, count);
 // };
 
-const groupMotosByCategory = (motos: Moto[]): MotoCategories => {
-  return {
-    cc110: motos.filter((m) => m.cc <= 110 && !m.isQuad),
-    cc125_150: motos.filter((m) => (m.cc === 125 || m.cc === 150) && !m.isQuad),
-    cc160plus: motos.filter((m) => m.cc >= 160 && !m.isQuad),
-    quads: motos.filter((m) => m.isQuad),
-  };
-};
+const groupMotosByCategory = (motos: CarouselMoto[]): CarouselBuckets => groupCarouselMotos(motos);
 
 const financingOptions = [
   {
@@ -82,40 +63,36 @@ const financingOptions = [
 
 
 const Landing: React.FC = () => {
-  // const [randomReviews, setRandomReviews] = useState<typeof reviewsData>([]);
-  // Determinar la sucursal desde la URL; fallback a localStorage
-  const branchFromPath = (typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : '') as 'parana' | 'venado';
-  const branch = (branchFromPath || (typeof window !== 'undefined' ? localStorage.getItem('branch') : 'venado')) || 'venado';
-  const [motoCategories, setMotoCategories] = useState<MotoCategories>({
+  const branchFromPath = (typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : '');
+  const branch = resolveBranchSlug(branchFromPath || (typeof window !== 'undefined' ? localStorage.getItem('branch') : null));
+  const [motoCategories, setMotoCategories] = useState<CarouselBuckets>({
     cc110: [],
     cc125_150: [],
     cc160plus: [],
     quads: [],
   });
-  const [electricMotos, setElectricMotos] = useState<Moto[]>([]);
-  const [activeTab, setActiveTab] = useState<'cc110' | 'cc125_150' | 'cc160plus' | 'quads' | 'electricas'>('cc110');
+  const [electricMotos, setElectricMotos] = useState<CarouselMoto[]>([]);
+  const [activeTab, setActiveTab] = useState<CilindradaBucket | 'quads' | 'electricas'>('cc110');
   const [selectedFinancingOption, setSelectedFinancingOption] = useState<1 | 2 | 3 | null>(null);
   const [isTallerModalOpen, setIsTallerModalOpen] = useState(false);
 
   useEffect(() => {
-    const data = (motorbikesParana as Moto[]);
-    setMotoCategories(groupMotosByCategory(data));
+    let cancelled = false;
+    (async () => {
+      const sucursal = branchSlugToApiSucursal(branch);
+      const motos = await getAllMotos({ sucursal, es0km: true });
+      if (cancelled) return;
+      setMotoCategories(groupMotosByCategory(motos.map(motoToCarousel)));
+    })();
+    return () => { cancelled = true; };
   }, [branch]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const products = await ProductService.getProductsByCategoryName(MULTISITE_CATEGORY_ELECTRICAS);
+      const products = await getAllProductos({ categoria: PRODUCT_CATEGORY_ELECTRICAS });
       if (cancelled) return;
-      setElectricMotos(
-        products.map((u, i) => ({
-          id: u.id,
-          name: u.name,
-          cc: 0,
-          isQuad: false,
-          image: getUsedMotoDisplayImage(u, i),
-        })),
-      );
+      setElectricMotos(products.map(productoToCarousel));
     })();
     return () => { cancelled = true; };
   }, []);
@@ -165,9 +142,9 @@ const Landing: React.FC = () => {
     () =>
       (
         [
-          { key: 'cc110' as const, label: '110CC' },
-          { key: 'cc125_150' as const, label: '125/150CC' },
-          { key: 'cc160plus' as const, label: '160CC o más' },
+          { key: 'cc110' as const, label: CILINDRADA_BUCKET_LABELS.cc110 },
+          { key: 'cc125_150' as const, label: CILINDRADA_BUCKET_LABELS.cc125_150 },
+          { key: 'cc160plus' as const, label: CILINDRADA_BUCKET_LABELS.cc160plus },
           { key: 'quads' as const, label: 'Cuatriciclos' },
         ] as const
       ).filter((c) => (motoCategories[c.key] || []).length > 0),
@@ -347,7 +324,7 @@ const Landing: React.FC = () => {
                 Usadas
               </a>
             </div>
-            {activeTab === 'electricas' && <MotoCarousel motos={electricMotos} detailHref="usadas" />}
+            {activeTab === 'electricas' && <MotoCarousel motos={electricMotos} />}
             {activeTab === 'cc110' && <MotoCarousel motos={motoCategories.cc110} />}
             {activeTab === 'cc125_150' && <MotoCarousel motos={motoCategories.cc125_150} />}
             {activeTab === 'cc160plus' && <MotoCarousel motos={motoCategories.cc160plus} />}

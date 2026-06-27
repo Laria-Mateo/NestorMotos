@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
-import motorbikesParana from '../data/motorbikesParana.json';
+import React, { useEffect, useMemo, useState } from 'react';
+import { getAllMotos } from '../api/catalogApi';
+import { branchSlugToApiSucursal } from '../constants/sucursal';
+import { resolveBranchSlug } from '../utils/branch';
+import type { Moto } from '../api/types';
+import { normalizeCilindrada, uniqueCilindradas } from '../utils/cilindrada';
 
 const WHATSAPP_PARANA = '5493433007984';
 const WHATSAPP_VENADO = '5493462252244';
@@ -11,6 +15,7 @@ interface FinancingModalProps {
 }
 
 const FinancingModal: React.FC<FinancingModalProps> = ({ isOpen, onClose, option }) => {
+  const [motos, setMotos] = useState<Moto[]>([]);
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [dni, setDni] = useState('');
@@ -23,12 +28,28 @@ const FinancingModal: React.FC<FinancingModalProps> = ({ isOpen, onClose, option
   const [kmUsada, setKmUsada] = useState(''); // Opción 3
   const [descripcionUsada, setDescripcionUsada] = useState(''); // Opción 3
 
-  const branch = (typeof window !== 'undefined' ? (localStorage.getItem('branch') || 'parana') : 'parana');
+  const branch = resolveBranchSlug(typeof window !== 'undefined' ? localStorage.getItem('branch') : null);
   const phone = branch === 'parana' ? WHATSAPP_PARANA : WHATSAPP_VENADO;
 
-  const cilindradasUnicas = Array.from(new Set(motorbikesParana.map(m => m.cc))).sort((a, b) => a - b);
-  const modelosFiltrados = cilindrada ? motorbikesParana.filter(m => String(m.cc) === cilindrada) : [];
-  const modelosUnicos = Array.from(new Set(modelosFiltrados.map(m => m.name)));
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+    (async () => {
+      const list = await getAllMotos({
+        sucursal: branchSlugToApiSucursal(branch),
+        es0km: true,
+      });
+      if (!cancelled) setMotos(list);
+    })();
+    return () => { cancelled = true; };
+  }, [isOpen, branch]);
+
+  const cilindradasUnicas = useMemo(() => uniqueCilindradas(motos.map((m) => m.cilindrada)), [motos]);
+  const modelosFiltrados = useMemo(
+    () => (cilindrada ? motos.filter((m) => normalizeCilindrada(m.cilindrada) === normalizeCilindrada(cilindrada)) : []),
+    [cilindrada, motos],
+  );
+  const modelosUnicos = Array.from(new Set(modelosFiltrados.map((m) => m.nombre)));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +80,7 @@ const FinancingModal: React.FC<FinancingModalProps> = ({ isOpen, onClose, option
       if (kmUsada) mensaje += `Kilometraje: ${Number(kmUsada).toLocaleString()} km\n`;
       if (descripcionUsada) mensaje += `Descripción: ${descripcionUsada}\n`;
     }
-    if (option === 1 && cilindrada) mensaje += `Cilindrada: ${cilindrada}cc\n`;
+    if (option === 1 && cilindrada) mensaje += `Cilindrada: ${cilindrada}\n`;
     if (option === 1 && modelo) mensaje += `Modelo: ${modelo}\n`;
     if (observaciones) mensaje += `Observaciones: ${observaciones}\n`;
     
@@ -162,8 +183,8 @@ const FinancingModal: React.FC<FinancingModalProps> = ({ isOpen, onClose, option
                     onChange={(e) => { setCilindrada(e.target.value); setModelo(''); }}
                   >
                     <option value="">-- Elegir cilindrada --</option>
-                    {cilindradasUnicas.map((cc, idx) => (
-                      <option key={idx} value={cc}>{cc}cc</option>
+                    {cilindradasUnicas.map((cc) => (
+                      <option key={cc} value={cc}>{cc}</option>
                     ))}
                   </select>
                 </div>
