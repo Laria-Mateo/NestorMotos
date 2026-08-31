@@ -11,6 +11,7 @@ import FinancingModal from '../components/FinancingModal';
 import TallerModal from '../components/TallerModal';
 import SectionTitle from '../components/SectionTitle';
 import BrandFilterBar from '../components/BrandFilterBar';
+import HeroBackgroundVideo from '../components/HeroBackgroundVideo';
 import { getAllMarcas, getAllMotos, getAllProductos } from '../api/catalogApi';
 import type { Marca } from '../api/types';
 import { PRODUCT_CATEGORY_ELECTRICAS } from '../constants/categories';
@@ -254,19 +255,22 @@ const Landing: React.FC = () => {
         <section
           id="home"
           className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-black hero-background"
-          style={{
-            backgroundImage: `url(${branch === 'parana' ? '/background2.webp' : '/backgroundVenado.webp'})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
         >
-          {/* Capa de color para mejorar legibilidad */}
+          {branch === 'parana' ? (
+            <HeroBackgroundVideo
+              posterSrc="/background2.webp"
+              mp4Src="/videos/parana-hero.mp4"
+            />
+          ) : (
+            <div
+              className="absolute inset-0 z-0 bg-cover bg-center"
+              style={{ backgroundImage: 'url(/backgroundVenado.webp)' }}
+              aria-hidden
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/80 z-20" />
-          {/* Radiales sutiles con marca */}
           <div className="absolute inset-0 hero-overlay-radials z-10" />
-          {/* Grid sutil */}
           <div className="absolute inset-0 hero-grid z-10" />
-          {/* Viñeta alrededor */}
           <div className="absolute inset-0 hero-overlay-vignette z-20" />
 
           <div className="relative z-30 flex flex-col items-center justify-center w-full px-4 text-center">
