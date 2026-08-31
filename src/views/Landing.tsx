@@ -388,73 +388,129 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
-        <section id="about" className="py-20 bg-white border-b border-gray-200">
-          <div className="max-w-4xl mx-auto px-4">
-            <SectionTitle>Sobre Nosotros</SectionTitle>
-            <div className="grid md:grid-cols-2 gap-8 items-start">
-              <div className="flex flex-col gap-6">
-                <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
-                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                  </span>
-                  <span className="text-lg font-semibold text-black">Financiamos tu moto <span className="text-[#ff6600] font-bold">solo con DNI</span></span>
-                </div>
-                <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
-                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 17v-2a4 4 0 014-4h8a4 4 0 014 4v2" /><circle cx="12" cy="7" r="4" stroke="#ff6600" strokeWidth={2}/></svg>
-                  </span>
-                  <span className="text-lg font-semibold text-black">Trabajamos <span className="text-[#ff6600] font-bold">todas las marcas</span></span>
-                </div>
-                <div className="flex items-start gap-4 bg-gray-50 rounded-xl shadow p-4">
-                  <span className="bg-[#ff6600]/10 p-3 rounded-full">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><circle cx="12" cy="12" r="10" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" /></svg>
-                  </span>
-                  <div className="text-lg font-semibold text-black">
-                    Horarios
-                    <div className="mt-1 text-base font-normal text-black/80 leading-relaxed">
-                      <div><span className="text-[#ff6600] font-bold">Lunes a Viernes</span>: 08:00–13:00 y 16:00–20:00</div>
-                      <div><span className="text-[#ff6600] font-bold">Sábados</span>: 09:00–13:00</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between gap-4 bg-gray-50 rounded-xl shadow p-4">
-                  <div className="flex items-center gap-4">
-                    <span className="bg-[#ff6600]/10 p-3 rounded-full">
-                      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17l3-3 3 3M9 7l3 3 3-3" /></svg>
+        <section id="servicios" className="py-20 bg-white border-b border-gray-200">
+          <div className={`mx-auto px-4 ${branch === 'parana' ? 'max-w-5xl' : 'max-w-4xl'}`}>
+            <SectionTitle>Servicios</SectionTitle>
+            <p className="text-center text-gray-600 text-lg max-w-2xl mx-auto mb-10">
+              Financiación, marcas, taller y horarios de atención.
+            </p>
+            {branch === 'parana' ? (
+              <div className="flex flex-col gap-8">
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
+                    <span className="bg-[#ff6600]/10 p-3 rounded-full shrink-0">
+                      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                     </span>
-                    <span className="text-lg font-bold text-[#ff6600] uppercase">TALLER PROPIO</span>
+                    <span className="text-lg font-semibold text-black">Financiamos tu moto <span className="text-[#ff6600] font-bold">solo con DNI</span></span>
                   </div>
-                  <button
-                    onClick={() => setIsTallerModalOpen(true)}
-                    className="px-4 py-2 bg-[#ff6600] hover:bg-[#ff7a33] text-white font-bold rounded-xl transition"
+                  <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
+                    <span className="bg-[#ff6600]/10 p-3 rounded-full shrink-0">
+                      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 17v-2a4 4 0 014-4h8a4 4 0 014 4v2" /><circle cx="12" cy="7" r="4" stroke="#ff6600" strokeWidth={2}/></svg>
+                    </span>
+                    <span className="text-lg font-semibold text-black">Trabajamos <span className="text-[#ff6600] font-bold">todas las marcas</span></span>
+                  </div>
+                  <div className="flex items-start gap-4 bg-gray-50 rounded-xl shadow p-4">
+                    <span className="bg-[#ff6600]/10 p-3 rounded-full shrink-0">
+                      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><circle cx="12" cy="12" r="10" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" /></svg>
+                    </span>
+                    <div className="text-lg font-semibold text-black">
+                      Horarios
+                      <div className="mt-1 text-base font-normal text-black/80 leading-relaxed">
+                        <div><span className="text-[#ff6600] font-bold">Lunes a Viernes</span>: 08:00–13:00 y 16:00–20:00</div>
+                        <div><span className="text-[#ff6600] font-bold">Sábados</span>: 09:00–13:00</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 bg-gray-50 rounded-xl shadow p-4">
+                    <div className="flex items-center gap-4">
+                      <span className="bg-[#ff6600]/10 p-3 rounded-full shrink-0">
+                        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17l3-3 3 3M9 7l3 3 3-3" /></svg>
+                      </span>
+                      <span className="text-lg font-bold text-[#ff6600] uppercase">TALLER PROPIO</span>
+                    </div>
+                    <button
+                      onClick={() => setIsTallerModalOpen(true)}
+                      className="px-4 py-2 bg-[#ff6600] hover:bg-[#ff7a33] text-white font-bold rounded-xl transition shrink-0"
+                    >
+                      Por turnos
+                    </button>
+                  </div>
+                </div>
+                <div className="flex justify-center">
+                  <Link
+                    to={`/${branch}/empresa`}
+                    className="inline-flex items-center justify-center px-6 py-3 bg-[#ff6600] hover:bg-[#ff7a33] text-white font-bold rounded-xl transition"
                   >
-                    Por turnos
-                  </button>
+                    Conocé el equipo y nuestros locales
+                  </Link>
                 </div>
               </div>
-              <div className="flex flex-col gap-6">
-                {locations.map((loc) => (
-                  <div key={loc.label} className="flex flex-col gap-3">
-                    <h3 className="text-sm font-bold text-[#ff6600] uppercase tracking-wide">{loc.label}</h3>
-                    <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden w-full h-56">
-                      <iframe
-                        title={`Mapa ${loc.label}`}
-                        src={`https://www.google.com/maps?q=${loc.mapQuery}&z=17&output=embed`}
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                      />
-                    </div>
-                    <p className="text-base text-black font-semibold text-center">
-                      <span className="text-[#ff6600] font-bold">{loc.address}</span>
-                    </p>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-8 items-start">
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
+                    <span className="bg-[#ff6600]/10 p-3 rounded-full">
+                      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    </span>
+                    <span className="text-lg font-semibold text-black">Financiamos tu moto <span className="text-[#ff6600] font-bold">solo con DNI</span></span>
                   </div>
-                ))}
+                  <div className="flex items-center gap-4 bg-gray-50 rounded-xl shadow p-4">
+                    <span className="bg-[#ff6600]/10 p-3 rounded-full">
+                      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 17v-2a4 4 0 014-4h8a4 4 0 014 4v2" /><circle cx="12" cy="7" r="4" stroke="#ff6600" strokeWidth={2}/></svg>
+                    </span>
+                    <span className="text-lg font-semibold text-black">Trabajamos <span className="text-[#ff6600] font-bold">todas las marcas</span></span>
+                  </div>
+                  <div className="flex items-start gap-4 bg-gray-50 rounded-xl shadow p-4">
+                    <span className="bg-[#ff6600]/10 p-3 rounded-full">
+                      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><circle cx="12" cy="12" r="10" stroke="#ff6600" strokeWidth={2}/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" /></svg>
+                    </span>
+                    <div className="text-lg font-semibold text-black">
+                      Horarios
+                      <div className="mt-1 text-base font-normal text-black/80 leading-relaxed">
+                        <div><span className="text-[#ff6600] font-bold">Lunes a Viernes</span>: 08:00–13:00 y 16:00–20:00</div>
+                        <div><span className="text-[#ff6600] font-bold">Sábados</span>: 09:00–13:00</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 bg-gray-50 rounded-xl shadow p-4">
+                    <div className="flex items-center gap-4">
+                      <span className="bg-[#ff6600]/10 p-3 rounded-full">
+                        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#ff6600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17l3-3 3 3M9 7l3 3 3-3" /></svg>
+                      </span>
+                      <span className="text-lg font-bold text-[#ff6600] uppercase">TALLER PROPIO</span>
+                    </div>
+                    <button
+                      onClick={() => setIsTallerModalOpen(true)}
+                      className="px-4 py-2 bg-[#ff6600] hover:bg-[#ff7a33] text-white font-bold rounded-xl transition"
+                    >
+                      Por turnos
+                    </button>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-6">
+                  {locations.map((loc) => (
+                    <div key={loc.label} className="flex flex-col gap-3">
+                      <h3 className="text-sm font-bold text-[#ff6600] uppercase tracking-wide">{loc.label}</h3>
+                      <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden w-full h-56">
+                        <iframe
+                          title={`Mapa ${loc.label}`}
+                          src={`https://www.google.com/maps?q=${loc.mapQuery}&z=17&output=embed`}
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                        />
+                      </div>
+                      <p className="text-base text-black font-semibold text-center">
+                        <span className="text-[#ff6600] font-bold">{loc.address}</span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </section>
 

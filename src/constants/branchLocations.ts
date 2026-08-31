@@ -4,6 +4,7 @@ export type BranchLocation = {
   label: string;
   address: string;
   mapQuery: string;
+  image?: string;
 };
 
 const PARANA_LOCATIONS: BranchLocation[] = [
@@ -11,11 +12,13 @@ const PARANA_LOCATIONS: BranchLocation[] = [
     label: 'Sucursal Centro',
     address: 'Esquina Av. Espejo, Leopoldo Lugones y, E3100 Paraná, Entre Ríos',
     mapQuery: '-31.756278196473883,-60.53260317611488',
+    image: '/equipo/locales/centro.webp',
   },
   {
     label: 'Sucursal Gualeguaychú',
     address: 'Gualeguaychú y 9 de Julio, Paraná, Entre Ríos',
     mapQuery: '-31.736667,-60.529389',
+    image: '/equipo/locales/gualeguaychu.webp',
   },
 ];
 
