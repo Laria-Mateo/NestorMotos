@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Landing from './views/Landing';
 import Models from './views/Models';
 import ModelDetail from './views/ModelDetail';
@@ -8,6 +8,7 @@ import BlogPost from './views/BlogPost.tsx';
 import UsedModels from './views/UsedModels.tsx';
 import UsedModelDetail from './views/UsedModelDetail.tsx';
 import BranchLayout from './views/BranchLayout.tsx';
+import Empresa from './views/Empresa.tsx';
 import AdminLogin from './admin/AdminLogin';
 import AdminBranchSelect from './admin/AdminBranchSelect';
 import AdminLayout from './admin/AdminLayout';
@@ -23,6 +24,11 @@ function AdminEntry() {
   if (!getAuthSession()) return <Navigate to="/admin/login" replace />;
   if (!getAdminBranch()) return <Navigate to="/admin/sucursal" replace />;
   return <Navigate to="/admin/panel" replace />;
+}
+
+function EmpresaRedirect() {
+  const { branch } = useParams<{ branch: string }>();
+  return <Navigate to={`/${branch || 'parana'}/empresa`} replace />;
 }
 
 function App() {
@@ -55,6 +61,9 @@ function App() {
         <Route path="usadas/:id" element={<UsedModelDetail />} />
         <Route path="blog" element={<Blog />} />
         <Route path="blog/:id" element={<BlogPost />} />
+        <Route path="empresa" element={<Empresa />} />
+        <Route path="nosotros" element={<EmpresaRedirect />} />
+        <Route path="equipo" element={<EmpresaRedirect />} />
       </Route>
 
       <Route path="/sucursal" element={<BranchSelect />} />

@@ -117,7 +117,37 @@ const Navbar: React.FC = () => {
 
         <ul className="hidden md:flex gap-6 font-medium items-center">
           <li><a href={`/${branchFromPath}#home`} className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#home')}>Inicio</a></li>
-          <li><a href={`/${branchFromPath}#about`} className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#about')}>Sobre Nosotros</a></li>
+          {branchFromPath === 'parana' ? (
+            <>
+              <li>
+                <Link
+                  to={`/${branchFromPath}/empresa`}
+                  className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]"
+                >
+                  Empresa
+                </Link>
+              </li>
+              <li>
+                <a
+                  href={`/${branchFromPath}#servicios`}
+                  className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]"
+                  onClick={goOrScroll('#servicios')}
+                >
+                  Servicios
+                </a>
+              </li>
+            </>
+          ) : (
+            <li>
+              <a
+                href={`/${branchFromPath}#servicios`}
+                className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]"
+                onClick={goOrScroll('#servicios')}
+              >
+                Servicios
+              </a>
+            </li>
+          )}
 
           <li className="relative" ref={modelsRef}>
             <button
@@ -175,10 +205,41 @@ const Navbar: React.FC = () => {
         </button>
       </div>
 
-      <div className={`md:hidden overflow-hidden transition-all duration-300 ${open ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'}`}>
+      <div className={`md:hidden overflow-hidden transition-all duration-300 ${open ? 'max-h-[580px] opacity-100' : 'max-h-0 opacity-0'}`}>
         <ul className="flex flex-col gap-2 px-4 pb-4 bg-gray-100 text-black border-t border-[#f75000]">
           <li><a href={`/${branchFromPath}#home`} className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white" onClick={(e) => { e.preventDefault(); closeMenus(); goOrScroll('#home')(e); }}>Inicio</a></li>
-          <li><a href={`/${branchFromPath}#about`} className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white" onClick={(e) => { e.preventDefault(); closeMenus(); goOrScroll('#about')(e); }}>Sobre Nosotros</a></li>
+          {branchFromPath === 'parana' ? (
+            <>
+              <li>
+                <Link
+                  to={`/${branchFromPath}/empresa`}
+                  onClick={closeMenus}
+                  className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white"
+                >
+                  Empresa
+                </Link>
+              </li>
+              <li>
+                <a
+                  href={`/${branchFromPath}#servicios`}
+                  className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white"
+                  onClick={(e) => { e.preventDefault(); closeMenus(); goOrScroll('#servicios')(e); }}
+                >
+                  Servicios
+                </a>
+              </li>
+            </>
+          ) : (
+            <li>
+              <a
+                href={`/${branchFromPath}#servicios`}
+                className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white"
+                onClick={(e) => { e.preventDefault(); closeMenus(); goOrScroll('#servicios')(e); }}
+              >
+                Servicios
+              </a>
+            </li>
+          )}
           <li>
             <button
               type="button"
