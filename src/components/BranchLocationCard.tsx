@@ -1,18 +1,46 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { BranchLocation } from '../constants/branchLocations';
+import { mapsEmbedUrl } from '../utils/mapsEmbed';
 
 type BranchLocationCardProps = {
   location: BranchLocation;
 };
 
 const BranchLocationCard: React.FC<BranchLocationCardProps> = ({ location }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [imageFailed, setImageFailed] = useState(false);
-  const showImage = Boolean(location.image) && !imageFailed;
+  const [videoFailed, setVideoFailed] = useState(false);
+
+  const hasVideo = Boolean(location.video) && !videoFailed;
+  const showImage = Boolean(location.image) && !imageFailed && !hasVideo;
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!hasVideo || !el) return;
+    const play = el.play();
+    if (play && typeof play.catch === 'function') {
+      play.catch(() => setVideoFailed(true));
+    }
+  }, [hasVideo, location.video]);
 
   return (
-    <article className="flex flex-col gap-4 bg-gray-50 rounded-2xl shadow-lg overflow-hidden">
-      <div className="relative w-full aspect-[16/10] bg-gray-200">
-        {showImage ? (
+    <article className="flex h-full flex-col bg-gray-50 rounded-2xl shadow-lg overflow-hidden">
+      <div className="relative w-full aspect-[16/10] shrink-0 bg-gray-200 overflow-hidden">
+        {hasVideo ? (
+          <video
+            ref={videoRef}
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster={location.image}
+            onError={() => setVideoFailed(true)}
+          >
+            <source src={location.video} type="video/mp4" />
+          </video>
+        ) : showImage ? (
           <img
             src={location.image}
             alt={location.label}
@@ -28,19 +56,17 @@ const BranchLocationCard: React.FC<BranchLocationCardProps> = ({ location }) => 
           </div>
         )}
       </div>
-      <div className="px-4 flex flex-col gap-2">
+      <div className="px-4 py-4 flex flex-col gap-2 shrink-0">
         <h3 className="text-sm font-bold text-[#ff6600] uppercase tracking-wide">{location.label}</h3>
-        <p className="text-base text-black font-semibold">
+        <p className="text-base text-black font-semibold min-h-[3rem]">
           <span className="text-[#ff6600] font-bold">{location.address}</span>
         </p>
       </div>
-      <div className="bg-gray-100 w-full h-56 md:h-64 overflow-hidden">
+      <div className="relative mt-auto bg-gray-100 w-full min-h-56 md:min-h-64 flex-1 overflow-hidden">
         <iframe
           title={`Mapa ${location.label}`}
-          src={`https://www.google.com/maps?q=${location.mapQuery}&z=17&output=embed`}
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
+          src={mapsEmbedUrl(location.mapQuery)}
+          className="absolute left-0 top-0 w-full h-full border-0"
           allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"

@@ -12,6 +12,7 @@ import TallerModal from '../components/TallerModal';
 import SectionTitle from '../components/SectionTitle';
 import BrandFilterBar from '../components/BrandFilterBar';
 import HeroBackgroundVideo from '../components/HeroBackgroundVideo';
+import OnlineSalesSection from '../components/OnlineSalesSection';
 import { getAllMarcas, getAllMotos, getAllProductos } from '../api/catalogApi';
 import type { Marca } from '../api/types';
 import { PRODUCT_CATEGORY_ELECTRICAS } from '../constants/categories';
@@ -26,6 +27,7 @@ import {
 import { CILINDRADA_BUCKET_LABELS, type CilindradaBucket } from '../utils/cilindrada';
 import { branchSlugToApiSucursal } from '../constants/sucursal';
 import { resolveBranchSlug } from '../utils/branch';
+import { mapsEmbedUrl } from '../utils/mapsEmbed';
 
 // const getRandomReviews = (reviews: typeof reviewsData, count: number) => {
 //   const shuffled = [...reviews].sort(() => 0.5 - Math.random());
@@ -348,6 +350,8 @@ const Landing: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {branch === 'parana' && <OnlineSalesSection />}
         
         <section id="financing" className="py-20 bg-black border-b border-gray-900">
           <div className="max-w-5xl mx-auto px-4">
@@ -495,13 +499,11 @@ const Landing: React.FC = () => {
                   {locations.map((loc) => (
                     <div key={loc.label} className="flex flex-col gap-3">
                       <h3 className="text-sm font-bold text-[#ff6600] uppercase tracking-wide">{loc.label}</h3>
-                      <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden w-full h-56">
+                      <div className="relative bg-gray-100 rounded-2xl shadow-lg overflow-hidden w-full h-56">
                         <iframe
                           title={`Mapa ${loc.label}`}
-                          src={`https://www.google.com/maps?q=${loc.mapQuery}&z=17&output=embed`}
-                          width="100%"
-                          height="100%"
-                          style={{ border: 0 }}
+                          src={mapsEmbedUrl(loc.mapQuery)}
+                          className="absolute inset-0 w-full h-full border-0"
                           allowFullScreen
                           loading="lazy"
                           referrerPolicy="no-referrer-when-downgrade"

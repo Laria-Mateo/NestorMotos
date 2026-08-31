@@ -193,6 +193,17 @@ const Navbar: React.FC = () => {
             )}
           </li>
 
+          {branchFromPath === 'parana' && (
+            <li>
+              <a
+                href={`/${branchFromPath}#venta-online`}
+                className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]"
+                onClick={goOrScroll('#venta-online')}
+              >
+                Venta online
+              </a>
+            </li>
+          )}
           <li><a href={`/${branchFromPath}#financing`} className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#financing')}>Financiación</a></li>
           <li><a href={`/${branchFromPath}#reviews`} className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#reviews')}>Referencias</a></li>
           <li><Link to={`/${branchFromPath}/blog`} className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]">Blog</Link></li>
@@ -277,6 +288,17 @@ const Navbar: React.FC = () => {
               </div>
             </div>
           </li>
+          {branchFromPath === 'parana' && (
+            <li>
+              <a
+                href={`/${branchFromPath}#venta-online`}
+                className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white"
+                onClick={(e) => { e.preventDefault(); closeMenus(); goOrScroll('#venta-online')(e); }}
+              >
+                Venta online
+              </a>
+            </li>
+          )}
           <li><a href={`/${branchFromPath}#financing`} className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white" onClick={(e) => { e.preventDefault(); closeMenus(); goOrScroll('#financing')(e); }}>Financiaciones</a></li>
           <li><a href={`/${branchFromPath}#reviews`} className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white" onClick={(e) => { e.preventDefault(); closeMenus(); goOrScroll('#reviews')(e); }}>Referencias</a></li>
           <li><Link to={`/${branchFromPath}/blog`} onClick={closeMenus} className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white">Blog</Link></li>

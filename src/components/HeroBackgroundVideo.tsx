@@ -19,9 +19,8 @@ const HeroBackgroundVideo: React.FC<Props> = ({ posterSrc, mp4Src, webmSrc }) =>
     }).connection;
     const saveData = Boolean(connection?.saveData);
     const slowNetwork = connection?.effectiveType === '2g' || connection?.effectiveType === 'slow-2g';
-    const isNarrow = window.matchMedia('(max-width: 767px)').matches;
 
-    if (prefersReducedMotion || saveData || slowNetwork || isNarrow) {
+    if (prefersReducedMotion || saveData || slowNetwork) {
       setUseVideo(false);
       return;
     }
@@ -56,7 +55,7 @@ const HeroBackgroundVideo: React.FC<Props> = ({ posterSrc, mp4Src, webmSrc }) =>
       muted
       loop
       playsInline
-      preload="metadata"
+      preload="auto"
       poster={posterSrc}
       aria-hidden
     >

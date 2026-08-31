@@ -5,20 +5,22 @@ export type BranchLocation = {
   address: string;
   mapQuery: string;
   image?: string;
+  video?: string;
 };
 
 const PARANA_LOCATIONS: BranchLocation[] = [
   {
     label: 'Sucursal Centro',
-    address: 'Esquina Av. Espejo, Leopoldo Lugones y, E3100 Paraná, Entre Ríos',
-    mapQuery: '-31.756278196473883,-60.53260317611488',
-    image: '/equipo/locales/centro.webp',
-  },
-  {
-    label: 'Sucursal Gualeguaychú',
     address: 'Gualeguaychú y 9 de Julio, Paraná, Entre Ríos',
     mapQuery: '-31.736667,-60.529389',
-    image: '/equipo/locales/gualeguaychu.webp',
+    image: '/background2.webp',
+    video: '/videos/parana-hero.mp4',
+  },
+  {
+    label: 'Sucursal Espejo',
+    address: 'Esquina Av. Espejo, Leopoldo Lugones y, E3100 Paraná, Entre Ríos',
+    mapQuery: '-31.756278196473883,-60.53260317611488',
+    image: '/background2.webp',
   },
 ];
 
