@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import ImageGallery from '../components/ImageGallery';
 import { getMotoById } from '../api/catalogApi';
 import type { Moto } from '../api/types';
 import { branchSlugToApiSucursal } from '../constants/sucursal';
@@ -35,6 +36,20 @@ const UsedModelDetail: React.FC = () => {
     return () => { cancelled = true; };
   }, [id, branchSlug]);
 
+  const galleryImages = useMemo(() => {
+    if (!moto) return [];
+    return [...moto.fotos]
+      .sort((a, b) => a.orden - b.orden)
+      .map((f) => ({ id: f.id, src: mediaUrl(f.fotoUrl) }));
+  }, [moto]);
+
+  const initialIndex = useMemo(() => {
+    if (!moto?.fotoPrincipalUrl) return 0;
+    const principal = mediaUrl(moto.fotoPrincipalUrl);
+    const index = galleryImages.findIndex((image) => image.src === principal);
+    return index >= 0 ? index : 0;
+  }, [galleryImages, moto?.fotoPrincipalUrl]);
+
   const openConsult = () => {
     if (!moto) return;
     const phone = branchSlug === 'parana' ? '5493433007984' : '5493462252244';
@@ -67,9 +82,6 @@ const UsedModelDetail: React.FC = () => {
     );
   }
 
-  const fotos = [...moto.fotos].sort((a, b) => a.orden - b.orden);
-  const mainImage = mediaUrl(moto.fotoPrincipalUrl ?? fotos[0]?.fotoUrl);
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
@@ -77,16 +89,9 @@ const UsedModelDetail: React.FC = () => {
         <section className="py-8">
           <div className="max-w-6xl mx-auto px-4">
             <button type="button" onClick={() => navigate(-1)} className="text-sm text-gray-600 hover:text-gray-900 mb-4">← Volver</button>
-            <div className="grid md:grid-cols-2 gap-8 bg-white rounded-2xl shadow ring-1 ring-gray-200 overflow-hidden">
-              <div className="bg-gray-50 flex flex-col items-center justify-center p-6 gap-4">
-                <img src={mainImage} alt={moto.nombre} className="w-full max-h-[560px] object-contain" />
-                {fotos.length > 1 && (
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {fotos.map((f) => (
-                      <img key={f.id} src={mediaUrl(f.fotoUrl)} alt="" className="h-16 w-16 object-contain bg-white rounded-lg ring-1 ring-gray-200" />
-                    ))}
-                  </div>
-                )}
+            <div className="grid md:grid-cols-2 gap-8 bg-white rounded-2xl shadow ring-1 ring-gray-200">
+              <div className="bg-gray-50 flex flex-col items-center justify-center p-6 overflow-visible">
+                <ImageGallery images={galleryImages} alt={moto.nombre} initialIndex={initialIndex} />
               </div>
               <div className="p-6 md:p-8 flex flex-col">
                 <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900">{moto.nombre}</h1>
