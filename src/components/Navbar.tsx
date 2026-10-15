@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { CONCESIONARIA_URL } from '../constants/concesionaria';
+
+const concesionariaLinkClass = 'px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]';
+const concesionariaMobileClass = 'block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white';
 
 const ChevronDown = ({ open }: { open: boolean }) => (
   <svg
@@ -207,6 +211,11 @@ const Navbar: React.FC = () => {
           <li><a href={`/${branchFromPath}#financing`} className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#financing')}>Financiación</a></li>
           <li><a href={`/${branchFromPath}#reviews`} className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#reviews')}>Referencias</a></li>
           <li><Link to={`/${branchFromPath}/blog`} className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]">Blog</Link></li>
+          <li>
+            <a href={CONCESIONARIA_URL} target="_blank" rel="noopener noreferrer" className={concesionariaLinkClass}>
+              Concesionaria
+            </a>
+          </li>
           <li><a href={`/${branchFromPath}#contact`} className="px-2 py-1 hover:text-[#f75000] hover:underline underline-offset-8 decoration-2 decoration-[#f75000]" onClick={goOrScroll('#contact')}>Contacto</a></li>
           <li><button onClick={() => navigate('/sucursal')} className="px-2 py-1 rounded border border-[#f75000] text-[#f75000] hover:bg-[#f75000]/10">Sucursal</button></li>
         </ul>
@@ -216,7 +225,7 @@ const Navbar: React.FC = () => {
         </button>
       </div>
 
-      <div className={`md:hidden overflow-hidden transition-all duration-300 ${open ? 'max-h-[580px] opacity-100' : 'max-h-0 opacity-0'}`}>
+      <div className={`md:hidden overflow-hidden transition-all duration-300 ${open ? 'max-h-[760px] opacity-100' : 'max-h-0 opacity-0'}`}>
         <ul className="flex flex-col gap-2 px-4 pb-4 bg-gray-100 text-black border-t border-[#f75000]">
           <li><a href={`/${branchFromPath}#home`} className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white" onClick={(e) => { e.preventDefault(); closeMenus(); goOrScroll('#home')(e); }}>Inicio</a></li>
           {branchFromPath === 'parana' ? (
@@ -302,6 +311,11 @@ const Navbar: React.FC = () => {
           <li><a href={`/${branchFromPath}#financing`} className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white" onClick={(e) => { e.preventDefault(); closeMenus(); goOrScroll('#financing')(e); }}>Financiaciones</a></li>
           <li><a href={`/${branchFromPath}#reviews`} className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white" onClick={(e) => { e.preventDefault(); closeMenus(); goOrScroll('#reviews')(e); }}>Referencias</a></li>
           <li><Link to={`/${branchFromPath}/blog`} onClick={closeMenus} className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white">Blog</Link></li>
+          <li>
+            <a href={CONCESIONARIA_URL} target="_blank" rel="noopener noreferrer" onClick={closeMenus} className={concesionariaMobileClass}>
+              Concesionaria
+            </a>
+          </li>
           <li><a href={`/${branchFromPath}#contact`} className="block py-2 px-3 rounded hover:bg-[#f75000] hover:text-white" onClick={(e) => { e.preventDefault(); closeMenus(); goOrScroll('#contact')(e); }}>Contacto</a></li>
           <li className="pt-2 border-t border-gray-200"><button onClick={() => { closeMenus(); navigate('/sucursal'); }} className="w-full py-2 rounded border border-[#f75000] text-[#f75000]">Elegir sucursal</button></li>
         </ul>
