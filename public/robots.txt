@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://nestormotos.com.ar/sitemap.xml
+Sitemap: https://nestormotos.com/sitemap.xml
 
 # Disallow admin or private areas (if any)
 # Disallow: /admin/

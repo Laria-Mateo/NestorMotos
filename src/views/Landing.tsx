@@ -13,6 +13,7 @@ import SectionTitle from '../components/SectionTitle';
 import BrandFilterBar from '../components/BrandFilterBar';
 import HeroBackgroundVideo from '../components/HeroBackgroundVideo';
 import OnlineSalesSection from '../components/OnlineSalesSection';
+import ClasionceSection from '../components/ClasionceSection';
 import { getAllMarcas, getAllMotos, getAllProductos } from '../api/catalogApi';
 import type { Marca } from '../api/types';
 import { PRODUCT_CATEGORY_ELECTRICAS } from '../constants/categories';
@@ -352,6 +353,8 @@ const Landing: React.FC = () => {
         </section>
 
         {branch === 'parana' && <OnlineSalesSection />}
+
+        <ClasionceSection />
         
         <section id="financing" className="py-20 bg-black border-b border-gray-900">
           <div className="max-w-5xl mx-auto px-4">
