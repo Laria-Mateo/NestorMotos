@@ -107,22 +107,20 @@ const BlogPost: React.FC = () => {
       'precio', 'financiación', '0km', 'usada', 'review', 'novedades'
     ];
     const keywords = Array.from(new Set([...baseKeywords, ...extraKw])).join(', ');
-    const image = post.seo?.image || post.cover;
+    const rawImage = post.seo?.image || post.cover || '/logo.webp';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://nestormotos.com';
+    const image = rawImage.startsWith('http') ? rawImage : `${origin}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
 
-    // SEO básicos
     ensureMeta('meta[name="description"]', { name: 'description', content: desc });
     ensureMeta('meta[name="keywords"]', { name: 'keywords', content: keywords });
     ensureMeta('meta[property="og:title"]', { property: 'og:title', content: title });
     ensureMeta('meta[property="og:description"]', { property: 'og:description', content: desc });
     ensureMeta('meta[property="og:image"]', { property: 'og:image', content: image });
 
-    // Canonical consolidado en Paraná para evitar duplicados entre sucursales
-    const loc = typeof window !== 'undefined' ? window.location : undefined;
-    const canonical = loc ? `${loc.origin}/parana/blog/${id}` : `/parana/blog/${id}`;
+    const canonical = `${origin}/parana/blog/${id}`;
     ensureLink('canonical', canonical);
     ensureMeta('meta[property="og:url"]', { property: 'og:url', content: canonical });
 
-    // Twitter cards
     ensureMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary_large_image' });
     ensureMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: title });
     ensureMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: desc });
